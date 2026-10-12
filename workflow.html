@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workforce Management | SITENEXA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#08080a;
+    --bg-sidebar:#0c0c0f;
+    --bg-topbar:#0a0a0d;
+    --panel:rgba(255,255,255,0.035);
+    --panel-hover:rgba(255,255,255,0.055);
+    --border:rgba(255,255,255,0.09);
+    --border-soft:rgba(255,255,255,0.06);
+    --orange:#f97316;
+    --orange-light:#fb923c;
+    --orange-dim:rgba(249,115,22,0.14);
+    --orange-glow:rgba(249,115,22,0.35);
+    --green:#22c55e;
+    --green-dim:rgba(34,197,94,0.14);
+    --red:#ef4444;
+    --red-dim:rgba(239,68,68,0.14);
+    --amber:#eab308;
+    --amber-dim:rgba(234,179,8,0.14);
+    --blue:#60a5fa;
+    --text-1:#f5f5f6;
+    --text-2:#9a9aa3;
+    --text-3:#6b6b74;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --shadow-card:0 8px 30px rgba(0,0,0,0.35);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 85% -10%, rgba(249,115,22,0.08), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 0% 100%, rgba(249,115,22,0.05), transparent 60%),
+      var(--bg);
+    color:var(--text-1);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  .app{display:flex;min-height:100vh;}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:260px;flex-shrink:0;background:var(--bg-sidebar);
+    border-right:1px solid var(--border-soft);
+    display:flex;flex-direction:column;padding:22px 16px;
+    position:sticky;top:0;height:100vh;
+  }
+  .brand{display:flex;align-items:center;gap:12px;padding:4px 8px 26px;}
+  .brand-icon{
+    width:40px;height:40px;border-radius:11px;
+    background:linear-gradient(145deg,var(--orange-light),#c2410c);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px var(--orange-glow);flex-shrink:0;
+  }
+  .brand-icon svg{width:20px;height:20px;stroke:#0a0a0a;fill:none;stroke-width:2.2;}
+  .brand-name{font-size:16.5px;font-weight:800;letter-spacing:0.4px;}
+  .nav-label{font-size:10.5px;font-weight:700;letter-spacing:1.4px;color:var(--text-3);padding:16px 12px 8px;}
+  .nav{display:flex;flex-direction:column;gap:2px;}
+  .nav-item{
+    display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--radius-sm);
+    color:var(--text-2);font-size:14px;font-weight:500;position:relative;
+    transition:background .15s ease,color .15s ease;
+  }
+  .nav-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+  .nav-item:hover{background:var(--panel);color:var(--text-1);}
+  .nav-item.active{background:var(--orange-dim);color:var(--orange-light);font-weight:600;}
+  .nav-item.active::before{content:"";position:absolute;left:-16px;top:8px;bottom:8px;width:3px;background:var(--orange);border-radius:0 4px 4px 0;}
+  .nav-badge{margin-left:auto;background:var(--orange);color:#100800;font-size:11px;font-weight:800;padding:1px 7px;border-radius:20px;}
+  .sidebar-footer{margin-top:auto;display:flex;flex-direction:column;gap:10px;}
+  .status-pill{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--panel);border:1px solid var(--border-soft);font-size:12.5px;color:var(--text-2);font-weight:500;}
+  .dot-green{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulseGreen 2.2s ease-in-out infinite;}
+  @keyframes pulseGreen{0%,100%{box-shadow:0 0 6px var(--green);}50%{box-shadow:0 0 14px var(--green);}}
+  .profile-card{display:flex;align-items:center;gap:10px;padding:9px;border-radius:var(--radius-sm);background:var(--panel);border:1px solid var(--border-soft);}
+  .avatar{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:linear-gradient(145deg,var(--orange-light),#c2410c);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#100800;}
+  .profile-name{font-size:13.5px;font-weight:700;}
+  .profile-role{font-size:11.5px;color:var(--text-3);}
+
+  /* ---------- MAIN ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 32px;
+    background:var(--bg-topbar);border-bottom:1px solid var(--border-soft);position:sticky;top:0;z-index:30;
+  }
+  .greeting-title{font-size:20px;font-weight:800;}
+  .greeting-sub{font-size:13px;color:var(--text-2);margin-top:2px;}
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;width:240px;color:var(--text-3);font-size:13px;}
+  .search-box svg{width:15px;height:15px;stroke:var(--text-3);fill:none;stroke-width:2;flex-shrink:0;}
+  .icon-btn{width:38px;height:38px;border-radius:var(--radius-sm);background:var(--panel);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .15s;}
+  .icon-btn:hover{background:var(--panel-hover);}
+  .icon-btn svg{width:17px;height:17px;stroke:var(--text-2);fill:none;stroke-width:1.8;}
+  .notif-dot{position:absolute;top:8px;right:9px;width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 6px var(--orange);}
+  .online-pill{display:flex;align-items:center;gap:7px;background:var(--green-dim);border:1px solid rgba(34,197,94,0.3);color:var(--green);font-size:12.5px;font-weight:700;padding:8px 14px;border-radius:20px;white-space:nowrap;}
+  .avatar-top{width:38px;height:38px;border-radius:10px;background:linear-gradient(145deg,var(--orange-light),#c2410c);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#100800;}
+
+  .content{padding:28px 32px 60px;display:flex;flex-direction:column;gap:22px;}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:24px;}
+  .card-title{font-size:16px;font-weight:800;}
+  .card-sub{font-size:12.5px;color:var(--text-3);margin-top:2px;}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:14px;flex-wrap:wrap;}
+
+  /* -------- SUMMARY CARDS -------- */
+  .overview-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+  .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;flex-direction:column;gap:14px;transition:border-color .15s ease, transform .15s ease, box-shadow .15s ease;}
+  .stat-card:hover{border-color:rgba(249,115,22,0.4);transform:translateY(-3px);box-shadow:0 12px 32px rgba(249,115,22,0.12),var(--shadow-card);}
+  .stat-top{display:flex;align-items:center;justify-content:space-between;}
+  .stat-icon{width:40px;height:40px;border-radius:11px;background:var(--orange-dim);display:flex;align-items:center;justify-content:center;}
+  .stat-icon svg{width:19px;height:19px;stroke:var(--orange-light);fill:none;stroke-width:1.9;}
+  .trend-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
+  .trend-up{background:var(--green-dim);color:var(--green);}
+  .trend-down{background:var(--red-dim);color:#fca5a5;}
+  .trend-flat{background:rgba(255,255,255,0.06);color:var(--text-2);}
+  .stat-value{font-size:26px;font-weight:800;}
+  .stat-label{font-size:12.5px;color:var(--text-2);font-weight:500;}
+
+  /* -------- CONTROLS BAR -------- */
+  .controls-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .ctrl-search{
+    display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--border);
+    border-radius:var(--radius-sm);padding:10px 14px;flex:1;min-width:220px;max-width:320px;
+  }
+  .ctrl-search svg{width:16px;height:16px;stroke:var(--text-3);fill:none;stroke-width:2;flex-shrink:0;}
+  .ctrl-search input{background:none;border:none;outline:none;color:var(--text-1);font-size:13.5px;width:100%;font-family:inherit;}
+  .ctrl-search input::placeholder{color:var(--text-3);}
+  select.ctrl-select{
+    appearance:none;-webkit-appearance:none;background:var(--panel) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%239a9aa3" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>') no-repeat right 12px center / 14px;
+    border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 34px 10px 14px;
+    color:var(--text-2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+  }
+  select.ctrl-select:hover{background-color:var(--panel-hover);}
+  .spacer{flex:1;}
+  .btn{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);transition:transform .12s ease,box-shadow .12s ease,background .12s ease;white-space:nowrap;}
+  .btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.1;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:linear-gradient(135deg,var(--orange-light),var(--orange));color:#150900;border:none;box-shadow:0 6px 18px var(--orange-glow);}
+  .btn-ghost{background:var(--panel);color:var(--text-1);}
+  .btn-ghost:hover{background:var(--panel-hover);}
+
+  /* -------- TABLE -------- */
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:920px;}
+  thead th{
+    text-align:left;font-size:11px;font-weight:700;letter-spacing:0.8px;color:var(--text-3);
+    padding:0 14px 12px;border-bottom:1px solid var(--border-soft);white-space:nowrap;
+  }
+  tbody td{padding:14px;border-bottom:1px solid var(--border-soft);font-size:13.5px;vertical-align:middle;}
+  tbody tr{cursor:pointer;transition:background .12s ease;}
+  tbody tr:hover{background:rgba(255,255,255,0.03);}
+  tbody tr:last-child td{border-bottom:none;}
+  .emp-cell{display:flex;align-items:center;gap:11px;}
+  .emp-avatar{width:34px;height:34px;border-radius:10px;background:var(--orange-dim);color:var(--orange-light);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;}
+  .emp-name{font-weight:700;color:var(--text-1);}
+  .emp-id{font-size:11.5px;color:var(--text-3);margin-top:1px;}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:20px;}
+  .badge-present{background:var(--green-dim);color:var(--green);}
+  .badge-absent{background:var(--red-dim);color:#fca5a5;}
+  .badge-late{background:var(--amber-dim);color:var(--amber);}
+  .badge-onsite{background:var(--green-dim);color:var(--green);}
+  .badge-offsite{background:rgba(255,255,255,0.07);color:var(--text-2);}
+  .badge-leave{background:var(--amber-dim);color:var(--amber);}
+  .prod-cell{display:flex;align-items:center;gap:8px;min-width:110px;}
+  .prod-bar-outer{flex:1;height:6px;border-radius:20px;background:rgba(255,255,255,0.07);overflow:hidden;}
+  .prod-bar-inner{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--orange),var(--orange-light));}
+  .prod-pct{font-size:12px;font-weight:700;color:var(--text-2);width:34px;text-align:right;}
+  .empty-row td{text-align:center;color:var(--text-3);padding:34px;font-size:13.5px;}
+
+  /* -------- TWO / THREE COL LAYOUTS -------- */
+  .two-col{display:grid;grid-template-columns:1.15fr 0.85fr;gap:22px;align-items:stretch;}
+  .charts-grid{display:grid;grid-template-columns:1.1fr 1.1fr 0.9fr;gap:20px;}
+  .chart-box{position:relative;height:210px;}
+
+  /* -------- 3D VIZ -------- */
+  .viz-card{padding:0;overflow:hidden;display:flex;flex-direction:column;}
+  .viz-head{display:flex;align-items:center;justify-content:space-between;padding:22px 24px 0;}
+  .live-tag{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-3);font-weight:600;}
+  .viz-canvas-wrap{flex:1;min-height:260px;position:relative;}
+  #three-canvas{width:100%;height:100%;display:block;}
+  .viz-caption{padding:14px 24px 20px;font-size:12px;color:var(--text-3);}
+
+  /* -------- AI INSIGHTS -------- */
+  .insight-row{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--border-soft);}
+  .insight-row:last-child{border-bottom:none;}
+  .insight-icon{width:30px;height:30px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .insight-icon svg{width:15px;height:15px;fill:none;stroke-width:2;}
+  .insight-good{background:var(--green-dim);}
+  .insight-good svg{stroke:var(--green);}
+  .insight-warn{background:rgba(249,115,22,0.16);}
+  .insight-warn svg{stroke:var(--orange-light);}
+  .insight-title{font-size:13.5px;font-weight:700;}
+  .insight-text{font-size:12.5px;color:var(--text-2);margin-top:2px;line-height:1.5;}
+
+  /* -------- MODAL -------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(4,4,6,0.72);backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;z-index:100;
+    opacity:0;pointer-events:none;transition:opacity .18s ease;padding:20px;
+  }
+  .modal-overlay.open{opacity:1;pointer-events:auto;}
+  .modal-box{
+    width:460px;max-width:100%;max-height:86vh;overflow-y:auto;
+    background:#0e0e11;border:1px solid var(--border);border-radius:var(--radius-lg);
+    box-shadow:0 30px 80px rgba(0,0,0,0.55),0 0 0 1px rgba(249,115,22,0.06);
+    padding:26px;transform:translateY(14px) scale(.98);transition:transform .2s ease;
+  }
+  .modal-overlay.open .modal-box{transform:translateY(0) scale(1);}
+  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
+  .modal-emp{display:flex;align-items:center;gap:13px;}
+  .modal-avatar{width:52px;height:52px;border-radius:13px;background:linear-gradient(145deg,var(--orange-light),#c2410c);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#150900;}
+  .modal-name{font-size:17px;font-weight:800;}
+  .modal-role{font-size:12.5px;color:var(--text-3);margin-top:2px;}
+  .modal-close{width:32px;height:32px;border-radius:9px;background:var(--panel);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+  .modal-close svg{width:15px;height:15px;stroke:var(--text-2);fill:none;stroke-width:2.2;}
+  .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+  .modal-field-label{font-size:10.5px;color:var(--text-3);font-weight:700;letter-spacing:0.5px;margin-bottom:4px;}
+  .modal-field-value{font-size:13.5px;font-weight:700;}
+  .modal-section-title{font-size:12px;font-weight:700;color:var(--text-2);letter-spacing:0.4px;margin:6px 0 10px;}
+  .modal-activity{display:flex;flex-direction:column;gap:11px;}
+  .modal-activity-row{display:flex;gap:10px;font-size:12.5px;color:var(--text-2);}
+  .modal-activity-row .dot{width:6px;height:6px;border-radius:50%;background:var(--orange);margin-top:5px;flex-shrink:0;box-shadow:0 0 6px var(--orange-glow);}
+
+  @media (max-width:1300px){
+    .charts-grid{grid-template-columns:1fr 1fr;}
+    .charts-grid > :last-child{grid-column:span 2;}
+  }
+  @media (max-width:1200px){
+    .overview-grid{grid-template-columns:repeat(3,1fr);}
+    .two-col{grid-template-columns:1fr;}
+    .charts-grid{grid-template-columns:1fr;}
+    .charts-grid > :last-child{grid-column:auto;}
+  }
+  @media (max-width:900px){
+    .sidebar{display:none;}
+    .overview-grid{grid-template-columns:repeat(2,1fr);}
+    .search-box{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5Z"/></svg></div>
+      <div class="brand-name">SITENEXA</div>
+    </div>
+
+    <div class="nav-label">MAIN</div>
+    <nav class="nav">
+      <a class="nav-item" href="Dashboard.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="project page.html">
+        <svg viewBox="0 0 24 24"><path d="M3 6a1 1 0 0 1 1-1h4.5l1.8 2H20a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6Z"/></svg>
+        Projects
+      </a>
+      <a class="nav-item active" href="workforce.html">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.4"/><path d="M22 20c0-2.6-2-4.8-5-5.5"/></svg>
+        Workforce
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+        Materials
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v2h6V3M8 10h8M8 14h8M8 18h5"/></svg>
+        Site Reports
+        <span class="nav-badge">6</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>
+        Analytics
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+        Documents
+      </a>
+    </nav>
+
+    <div class="nav-label">SYSTEM</div>
+    <nav class="nav">
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 1 5 5v3.5l1.6 3.4a1 1 0 0 1-.9 1.4H6.3a1 1 0 0 1-.9-1.4L7 11.5V8a5 5 0 0 1 5-5Z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg>
+        Notifications
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1h-.2a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.6v-.2a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.6 1h.2a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="status-pill"><span class="dot-green"></span> All Systems Operational</div>
+      <div class="profile-card">
+        <div class="avatar">AK</div>
+        <div>
+          <div class="profile-name">Harshini</div>
+          <div class="profile-role">Site Engineer</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="greeting-title">Workforce Management</div>
+        <div class="greeting-sub">Monitor workforce attendance, productivity and site allocation.</div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          Search sites, reports...
+        </div>
+        <div class="icon-btn"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg></div>
+        <div class="icon-btn"><svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 1 5 5v3.5l1.6 3.4a1 1 0 0 1-.9 1.4H6.3a1 1 0 0 1-.9-1.4L7 11.5V8a5 5 0 0 1 5-5Z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg><span class="notif-dot"></span></div>
+        <div class="online-pill"><span class="dot-green"></span> Operations Online</div>
+        <div class="avatar-top">AK</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- SUMMARY CARDS -->
+      <section class="overview-grid">
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.4"/><path d="M22 20c0-2.6-2-4.8-5-5.5"/></svg></div><span class="trend-badge trend-up">▲ 3.1%</span></div>
+          <div class="stat-value">248</div>
+          <div class="stat-label">Total Workforce</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg></div><span class="trend-badge trend-up">79% present</span></div>
+          <div class="stat-value">196</div>
+          <div class="stat-label">On Site Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg></div><span class="trend-badge trend-down">▼ 1.2%</span></div>
+          <div class="stat-value">18</div>
+          <div class="stat-label">Absent</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11M9 20v-6h6v6"/></svg></div><span class="trend-badge trend-flat">Steady</span></div>
+          <div class="stat-value">24</div>
+          <div class="stat-label">Supervisors</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v6c0 4.6 3.2 8.4 7.5 9 4.3-.6 7.5-4.4 7.5-9V6L12 3Z"/></svg></div><span class="trend-badge trend-up">▲ 2</span></div>
+          <div class="stat-value">10</div>
+          <div class="stat-label">Safety Staff</div>
+        </div>
+      </section>
+
+      <!-- CONTROLS -->
+      <section class="controls-bar">
+        <div class="ctrl-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" type="text" placeholder="Search employee name or ID...">
+        </div>
+        <select id="roleFilter" class="ctrl-select">
+          <option value="">All Roles</option>
+          <option>Site Engineer</option>
+          <option>Supervisor</option>
+          <option>Electrician</option>
+          <option>Plumber</option>
+          <option>Mason</option>
+          <option>Carpenter</option>
+          <option>Safety Officer</option>
+          <option>Helper</option>
+        </select>
+        <select id="projectFilter" class="ctrl-select">
+          <option value="">All Projects</option>
+          <option>Metro Tower</option>
+          <option>Harbor Bridge</option>
+          <option>Green Valley Residency</option>
+          <option>Lakeview Mall</option>
+        </select>
+        <select id="attendanceFilter" class="ctrl-select">
+          <option value="">All Attendance</option>
+          <option>Present</option>
+          <option>Absent</option>
+          <option>Late</option>
+        </select>
+        <div class="spacer"></div>
+        <div class="btn btn-ghost" id="exportBtn"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg> Export Report</div>
+        <div class="btn btn-primary" id="addWorkerBtn"><svg viewBox="0 0 24 24" stroke="#150900"><path d="M12 5v14M5 12h14"/></svg> Add Worker</div>
+      </section>
+
+      <!-- TABLE -->
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Workforce Directory</div>
+            <div class="card-sub" id="tableCount">Showing 14 of 14 employees</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Role</th>
+                <th>Project</th>
+                <th>Attendance</th>
+                <th>Check-in</th>
+                <th>Status</th>
+                <th>Productivity</th>
+              </tr>
+            </thead>
+            <tbody id="workforceTbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CHARTS -->
+      <section class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Workforce Productivity</div>
+            <div class="card-sub">Attendance, output and site allocation trends</div>
+          </div>
+        </div>
+        <div class="charts-grid">
+          <div>
+            <div class="modal-section-title" style="margin-top:0;">Daily Productivity</div>
+            <div class="chart-box"><canvas id="dailyProdChart"></canvas></div>
+          </div>
+          <div>
+            <div class="modal-section-title" style="margin-top:0;">Weekly Attendance</div>
+            <div class="chart-box"><canvas id="weeklyAttChart"></canvas></div>
+          </div>
+          <div>
+            <div class="modal-section-title" style="margin-top:0;">Project Distribution</div>
+            <div class="chart-box"><canvas id="projDistChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3D VIZ + AI INSIGHTS -->
+      <div class="two-col">
+        <section class="card viz-card">
+          <div class="viz-head">
+            <div>
+              <div class="card-title">Live Site Distribution</div>
+              <div class="card-sub">Real-time workforce movement across the tower</div>
+            </div>
+            <div class="live-tag"><span class="dot-green"></span> Digital Twin · Live</div>
+          </div>
+          <div class="viz-canvas-wrap"><canvas id="three-canvas"></canvas></div>
+          <div class="viz-caption">Each glowing marker represents an active crew moving between floors and site zones.</div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">AI Workforce Insight</div>
+              <div class="card-sub">Generated from live attendance &amp; output data</div>
+            </div>
+          </div>
+          <div class="insight-row">
+            <div class="insight-icon insight-good"><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg></div>
+            <div><div class="insight-title">Workforce availability is stable</div><div class="insight-text">79% of registered workforce checked in today, in line with the 4-week average.</div></div>
+          </div>
+          <div class="insight-row">
+            <div class="insight-icon insight-good"><svg viewBox="0 0 24 24"><path d="M4 20V10M11 20V4M18 20v-7"/></svg></div>
+            <div><div class="insight-title">Productivity increased this week</div><div class="insight-text">Average output per shift is up 5.4% compared to last week across all active sites.</div></div>
+          </div>
+          <div class="insight-row">
+            <div class="insight-icon insight-warn"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 2.5 17a1.8 1.8 0 0 0 1.5 2.7h16a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0Z"/></svg></div>
+            <div><div class="insight-title">One project shows lower availability</div><div class="insight-text">Green Valley Residency is running 14% below its usual daily headcount this week.</div></div>
+          </div>
+          <div class="insight-row">
+            <div class="insight-icon insight-warn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div>
+            <div><div class="insight-title">More crew may be needed soon</div><div class="insight-text">Upcoming concrete pour at Metro Tower may require 8–10 additional skilled workers.</div></div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- WORKER DETAILS MODAL -->
+<div class="modal-overlay" id="workerModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-emp">
+        <div class="modal-avatar" id="mAvatar">--</div>
+        <div>
+          <div class="modal-name" id="mName">—</div>
+          <div class="modal-role" id="mRoleProj">—</div>
+        </div>
+      </div>
+      <div class="modal-close" id="modalCloseBtn"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+    </div>
+    <div class="modal-grid">
+      <div><div class="modal-field-label">EMPLOYEE ID</div><div class="modal-field-value" id="mId">—</div></div>
+      <div><div class="modal-field-label">PHONE</div><div class="modal-field-value" id="mPhone">—</div></div>
+      <div><div class="modal-field-label">ATTENDANCE</div><div class="modal-field-value" id="mAttendance">—</div></div>
+      <div><div class="modal-field-label">PRODUCTIVITY</div><div class="modal-field-value" id="mProductivity">—</div></div>
+      <div><div class="modal-field-label">SAFETY TRAINING</div><div class="modal-field-value" id="mSafety">—</div></div>
+      <div><div class="modal-field-label">STATUS</div><div class="modal-field-value" id="mStatus">—</div></div>
+    </div>
+    <div class="modal-section-title">Recent Activity</div>
+    <div class="modal-activity" id="mActivity"></div>
+  </div>
+</div>
+
+<!-- ADD WORKER MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+
+    <div class="modal-head">
+      <div>
+        <div class="modal-name">Create Employee Account</div>
+        <div class="modal-role">
+          Engineering Admin creates the employee login credentials
+        </div>
+      </div>
+
+      <div class="modal-close" id="addModalCloseBtn">
+        <svg viewBox="0 0 24 24">
+          <path d="M6 6l12 12M18 6 6 18"/>
+        </svg>
+      </div>
+    </div>
+
+    <form id="addWorkerForm"
+          style="display:flex;flex-direction:column;gap:12px;">
+
+      <!-- FULL NAME -->
+      <div>
+        <div class="modal-field-label">FULL NAME</div>
+        <input
+          required
+          id="newName"
+          type="text"
+          placeholder="e.g. Harshini S.M."
+          style="width:100%;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);color:var(--text-1);font-size:13.5px;font-family:inherit;">
+      </div>
+
+      <!-- EMPLOYEE ID -->
+      <div>
+        <div class="modal-field-label">EMPLOYEE ID</div>
+        <input
+          required
+          id="newEmployeeId"
+          type="text"
+          placeholder="e.g. EMP001"
+          style="width:100%;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);color:var(--text-1);font-size:13.5px;font-family:inherit;">
+      </div>
+
+      <!-- ROLE + PROJECT -->
+      <div class="modal-grid" style="margin-bottom:0;">
+
+        <div>
+          <div class="modal-field-label">ROLE</div>
+          <select
+            id="newRole"
+            class="ctrl-select"
+            style="width:100%;">
+
+            <option>Site Engineer</option>
+            <option>Supervisor</option>
+            <option>Electrician</option>
+            <option>Plumber</option>
+            <option>Mason</option>
+            <option>Carpenter</option>
+            <option>Safety Officer</option>
+            <option>Helper</option>
+
+          </select>
+        </div>
+
+        <div>
+          <div class="modal-field-label">PROJECT</div>
+          <select
+            id="newProject"
+            class="ctrl-select"
+            style="width:100%;">
+
+            <option>Metro Tower</option>
+            <option>Harbor Bridge</option>
+            <option>Green Valley Residency</option>
+            <option>Lakeview Mall</option>
+
+          </select>
+        </div>
+
+      </div>
+
+      <!-- EMAIL -->
+      <div>
+        <div class="modal-field-label">EMAIL</div>
+        <input
+          required
+          id="newEmail"
+          type="email"
+          placeholder="employee@email.com"
+          style="width:100%;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);color:var(--text-1);font-size:13.5px;font-family:inherit;">
+      </div>
+
+      <!-- PHONE -->
+      <div>
+        <div class="modal-field-label">PHONE</div>
+        <input
+          required
+          id="newPhone"
+          type="text"
+          placeholder="+91 9876543210"
+          style="width:100%;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);color:var(--text-1);font-size:13.5px;font-family:inherit;">
+      </div>
+
+      <!-- PASSWORD -->
+      <div>
+        <div class="modal-field-label">PASSWORD</div>
+        <input
+          required
+          id="newPassword"
+          type="password"
+          placeholder="Create employee password"
+          style="width:100%;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);color:var(--text-1);font-size:13.5px;font-family:inherit;">
+      </div>
+
+      <!-- CONFIRM PASSWORD -->
+      <div>
+        <div class="modal-field-label">CONFIRM PASSWORD</div>
+        <input
+          required
+          id="confirmPassword"
+          type="password"
+          placeholder="Confirm password"
+          style="width:100%;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);color:var(--text-1);font-size:13.5px;font-family:inherit;">
+      </div>
+
+      <!-- BUTTON -->
+      <button
+        type="submit"
+        class="btn btn-primary"
+        style="justify-content:center;margin-top:6px;">
+
+        Create Employee Account
+
+      </button>
+
+    </form>
+
+  </div>
+</div>
+  </div>
+</div>
+
+<script>
+  // ---------------- DATA ----------------
+  const projects = ['Metro Tower','Harbor Bridge','Green Valley Residency','Lakeview Mall'];
+  const roles = ['Site Engineer','Supervisor','Electrician','Plumber','Mason','Carpenter','Safety Officer','Helper'];
+
+  let workforce = [
+    {id:'SNX-1042', name:'Rajesh Kumar', role:'Site Engineer', project:'Metro Tower', attendance:'Present', checkin:'07:58 AM', status:'On Site', productivity:92, phone:'+91 98765 10234', safety:'Certified', activity:['Logged structural inspection — Level 8','Approved concrete pour schedule','Reviewed rebar placement drawings']},
+    {id:'SNX-1043', name:'Priya Natarajan', role:'Supervisor', project:'Metro Tower', attendance:'Present', checkin:'08:02 AM', status:'On Site', productivity:88, phone:'+91 98765 10897', safety:'Certified', activity:['Assigned 12 workers to Level 7 slab','Conducted morning toolbox talk','Updated shift roster']},
+    {id:'SNX-1044', name:'Manoj Selvam', role:'Electrician', project:'Metro Tower', attendance:'Present', checkin:'08:10 AM', status:'On Site', productivity:81, phone:'+91 98765 11023', safety:'Certified', activity:['Completed panel wiring — Floor 6','Tested emergency lighting circuit']},
+    {id:'SNX-1045', name:'Karthik Iyer', role:'Plumber', project:'Harbor Bridge', attendance:'Present', checkin:'08:05 AM', status:'On Site', productivity:76, phone:'+91 98765 11456', safety:'Pending', activity:['Installed drainage line — Pier 3','Reported minor leak, flagged for repair']},
+    {id:'SNX-1046', name:'Suresh Babu', role:'Mason', project:'Green Valley Residency', attendance:'Late', checkin:'09:40 AM', status:'On Site', productivity:64, phone:'+91 98765 11789', safety:'Certified', activity:['Started brickwork — Block C, Unit 4']},
+    {id:'SNX-1047', name:'Anitha Ramesh', role:'Safety Officer', project:'Metro Tower', attendance:'Present', checkin:'07:50 AM', status:'On Site', productivity:95, phone:'+91 98765 12012', safety:'Certified', activity:['Completed full-site safety walk','Closed 2 open safety issues','Logged PPE compliance check']},
+    {id:'SNX-1048', name:'Dinesh Prabhu', role:'Carpenter', project:'Lakeview Mall', attendance:'Absent', checkin:'—', status:'Off Site', productivity:0, phone:'+91 98765 12345', safety:'Certified', activity:['On approved leave since yesterday']},
+    {id:'SNX-1049', name:'Vignesh Muthu', role:'Helper', project:'Metro Tower', attendance:'Present', checkin:'08:00 AM', status:'On Site', productivity:70, phone:'+91 98765 12678', safety:'Pending', activity:['Assisted material offloading — Gate 2']},
+    {id:'SNX-1050', name:'Lakshmi Devi', role:'Site Engineer', project:'Harbor Bridge', attendance:'Present', checkin:'08:15 AM', status:'On Site', productivity:89, phone:'+91 98765 12901', safety:'Certified', activity:['Reviewed pier reinforcement design','Coordinated with structural consultant']},
+    {id:'SNX-1051', name:'Gopal Krishnan', role:'Supervisor', project:'Green Valley Residency', attendance:'Absent', checkin:'—', status:'On Leave', productivity:0, phone:'+91 98765 13214', safety:'Certified', activity:['On sick leave — returning tomorrow']},
+    {id:'SNX-1052', name:'Farooq Ahmed', role:'Electrician', project:'Lakeview Mall', attendance:'Present', checkin:'08:20 AM', status:'On Site', productivity:83, phone:'+91 98765 13567', safety:'Certified', activity:['Completed switchgear installation']},
+    {id:'SNX-1053', name:'Bala Subramaniam', role:'Mason', project:'Metro Tower', attendance:'Present', checkin:'07:55 AM', status:'On Site', productivity:78, phone:'+91 98765 13890', safety:'Expired', activity:['Plastering work — Level 5 corridor']},
+    {id:'SNX-1054', name:'Meena Venkatesh', role:'Safety Officer', project:'Harbor Bridge', attendance:'Late', checkin:'09:20 AM', status:'On Site', productivity:72, phone:'+91 98765 14123', safety:'Certified', activity:['Delayed due to traffic, safety round in progress']},
+    {id:'SNX-1055', name:'Arun Prakash', role:'Helper', project:'Green Valley Residency', attendance:'Present', checkin:'08:08 AM', status:'On Site', productivity:75, phone:'+91 98765 14456', safety:'Pending', activity:['Site cleanup — Block A']},
+  ];
+
+  const tbody = document.getElementById('workforceTbody');
+  const tableCount = document.getElementById('tableCount');
+  const initials = n => n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  const attClass = a => a==='Present'?'badge-present':a==='Absent'?'badge-absent':'badge-late';
+  const statClass = s => s==='On Site'?'badge-onsite':s==='On Leave'?'badge-leave':'badge-offsite';
+
+  function renderTable(){
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const rf = document.getElementById('roleFilter').value;
+    const pf = document.getElementById('projectFilter').value;
+    const af = document.getElementById('attendanceFilter').value;
+
+    const filtered = workforce.filter(w=>{
+      if(q && !(w.name.toLowerCase().includes(q) || w.id.toLowerCase().includes(q))) return false;
+      if(rf && w.role !== rf) return false;
+      if(pf && w.project !== pf) return false;
+      if(af && w.attendance !== af) return false;
+      return true;
+    });
+
+    tableCount.textContent = `Showing ${filtered.length} of ${workforce.length} employees`;
+
+    if(filtered.length === 0){
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No employees match the current filters.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(w => `
+      <tr data-id="${w.id}">
+        <td>
+          <div class="emp-cell">
+            <div class="emp-avatar">${initials(w.name)}</div>
+            <div><div class="emp-name">${w.name}</div><div class="emp-id">${w.id}</div></div>
+          </div>
+        </td>
+        <td>${w.role}</td>
+        <td>${w.project}</td>
+        <td><span class="badge ${attClass(w.attendance)}">${w.attendance}</span></td>
+        <td>${w.checkin}</td>
+        <td><span class="badge ${statClass(w.status)}">${w.status}</span></td>
+        <td>
+          <div class="prod-cell">
+            <div class="prod-bar-outer"><div class="prod-bar-inner" style="width:${w.productivity}%"></div></div>
+            <span class="prod-pct">${w.productivity}%</span>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('tr[data-id]').forEach(row=>{
+      row.addEventListener('click', ()=> openWorkerModal(row.dataset.id));
+    });
+  }
+
+  ['searchInput','roleFilter','projectFilter','attendanceFilter'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', renderTable);
+    document.getElementById(id).addEventListener('change', renderTable);
+  });
+
+  // ---------------- WORKER MODAL ----------------
+  const workerModal = document.getElementById('workerModal');
+  function openWorkerModal(id){
+    const w = workforce.find(x=>x.id===id);
+    if(!w) return;
+    document.getElementById('mAvatar').textContent = initials(w.name);
+    document.getElementById('mName').textContent = w.name;
+    document.getElementById('mRoleProj').textContent = `${w.role} · ${w.project}`;
+    document.getElementById('mId').textContent = w.id;
+    document.getElementById('mPhone').textContent = w.phone;
+    document.getElementById('mAttendance').textContent = w.attendance;
+    document.getElementById('mProductivity').textContent = w.productivity + '%';
+    document.getElementById('mSafety').textContent = w.safety;
+    document.getElementById('mStatus').textContent = w.status;
+    document.getElementById('mActivity').innerHTML = w.activity.map(a=>`<div class="modal-activity-row"><span class="dot"></span><span>${a}</span></div>`).join('');
+    workerModal.classList.add('open');
+  }
+  document.getElementById('modalCloseBtn').addEventListener('click', ()=> workerModal.classList.remove('open'));
+  workerModal.addEventListener('click', e=>{ if(e.target===workerModal) workerModal.classList.remove('open'); });
+
+  // ---------------- ADD WORKER MODAL ----------------
+  const addModal = document.getElementById('addModal');
+  document.getElementById('addWorkerBtn').addEventListener('click', ()=> addModal.classList.add('open'));
+  document.getElementById('addModalCloseBtn').addEventListener('click', ()=> addModal.classList.remove('open'));
+  addModal.addEventListener('click', e=>{ if(e.target===addModal) addModal.classList.remove('open'); });
+
+  document.getElementById('addWorkerForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('newName').value.trim();
+    if(!name) return;
+    const nextNum = 1042 + workforce.length;
+    workforce.unshift({
+      id:`SNX-${nextNum}`, name,
+      role: document.getElementById('newRole').value,
+      project: document.getElementById('newProject').value,
+      attendance:'Present', checkin: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
+      status:'On Site', productivity: 70,
+      phone: document.getElementById('newPhone').value || '—',
+      safety:'Pending', activity:['Added to workforce directory']
+    });
+    this.reset();
+    addModal.classList.remove('open');
+    renderTable();
+  });
+
+  // ---------------- EXPORT ----------------
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
+    const rows = [['Employee ID','Name','Role','Project','Attendance','Check-in','Status','Productivity']];
+    workforce.forEach(w=> rows.push([w.id,w.name,w.role,w.project,w.attendance,w.checkin,w.status,w.productivity+'%']));
+    const csv = rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'workforce-report.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  renderTable();
+
+  // ---------------- CHARTS ----------------
+  Chart.defaults.color = '#9a9aa3';
+  Chart.defaults.font.family = "'Inter',sans-serif";
+  const gridColor = 'rgba(255,255,255,0.06)';
+
+  new Chart(document.getElementById('dailyProdChart'), {
+    type:'line',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets:[{
+        label:'Productivity %', data:[78,82,80,85,88,84,90],
+        borderColor:'#f97316', backgroundColor:'rgba(249,115,22,0.15)',
+        tension:0.4, fill:true, pointBackgroundColor:'#f97316', pointRadius:3
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:gridColor}}, 
+        y:{grid:{color:gridColor}, min:50, max:100}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('weeklyAttChart'), {
+    type:'bar',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets:[
+        {label:'Present', data:[210,205,198,201,196,180,150], backgroundColor:'#f97316', borderRadius:4},
+        {label:'Absent', data:[38,43,50,47,52,68,98], backgroundColor:'rgba(255,255,255,0.12)', borderRadius:4}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'top', labels:{boxWidth:10, font:{size:11}}}},
+      scales:{
+        x:{grid:{display:false}, stacked:true},
+        y:{grid:{color:gridColor}, stacked:true}
+      }
+    }
+  });
+
+  new Chart(document.getElementById('projDistChart'), {
+    type:'doughnut',
+    data:{
+      labels:['Metro Tower','Harbor Bridge','Green Valley','Lakeview Mall'],
+      datasets:[{
+        data:[92,54,38,64],
+        backgroundColor:['#f97316','#fb923c','#60a5fa','#3a3a42'],
+        borderColor:'#0e0e11', borderWidth:3
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      cutout:'62%',
+      plugins:{legend:{position:'bottom', labels:{boxWidth:9, font:{size:10.5}, padding:10}}}
+    }
+  });
+
+  // ---------------- THREE.JS: LIVE WORKFORCE DISTRIBUTION ----------------
+  (function(){
+    const canvas = document.getElementById('three-canvas');
+    const wrap = canvas.parentElement;
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.setClearColor(0x000000, 0);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x08080a, 0.045);
+
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    camera.position.set(7, 5.6, 9);
+    camera.lookAt(0, 2.6, 0);
+
+    const ORANGE = 0xf97316;
+    const ORANGE_LIGHT = 0xfdba74;
+    const STEEL = 0x2b2b31;
+    const GLASS = 0x11131a;
+
+    scene.add(new THREE.AmbientLight(0x8b8b95, 0.55));
+    const key = new THREE.DirectionalLight(0xfff2e0, 1.1);
+    key.position.set(6, 10, 4);
+    scene.add(key);
+    const rim = new THREE.PointLight(ORANGE, 2.2, 18, 2);
+    rim.position.set(-3, 5, -2);
+    scene.add(rim);
+    const fill = new THREE.PointLight(0x4a6fff, 0.5, 16, 2);
+    fill.position.set(4, 2, -5);
+    scene.add(fill);
+
+    const rig = new THREE.Group();
+    scene.add(rig);
+
+    const floors = 9;
+    const floorYs = [];
+    const buildingGroup = new THREE.Group();
+    for (let i = 0; i < floors; i++) {
+      const t = i / (floors - 1);
+      const w = 2.7 - t * 0.5;
+      const d = 2.0 - t * 0.35;
+      const y = i * 0.62;
+      floorYs.push(y);
+      const slabGeo = new THREE.BoxGeometry(w, 0.5, d);
+      const slabMat = new THREE.MeshStandardMaterial({ color: STEEL, metalness: 0.55, roughness: 0.4 });
+      const slab = new THREE.Mesh(slabGeo, slabMat);
+      slab.position.y = y;
+      buildingGroup.add(slab);
+
+      const glassGeo = new THREE.BoxGeometry(w * 1.002, 0.16, d * 1.002);
+      const glassMat = new THREE.MeshStandardMaterial({
+        color: GLASS, metalness: 0.2, roughness: 0.15,
+        emissive: i % 3 === 0 ? ORANGE : 0x000000,
+        emissiveIntensity: i % 3 === 0 ? 0.5 : 0
+      });
+      const glass = new THREE.Mesh(glassGeo, glassMat);
+      glass.position.y = y + 0.18;
+      buildingGroup.add(glass);
+
+      if (i < 7) {
+        const edges = new THREE.EdgesGeometry(slabGeo);
+        const edgeLines = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: ORANGE_LIGHT, transparent: true, opacity: 0.5 }));
+        edgeLines.position.y = y;
+        buildingGroup.add(edgeLines);
+      }
+    }
+    rig.add(buildingGroup);
+
+    const baseGeo = new THREE.BoxGeometry(4.2, 0.18, 3.6);
+    const base = new THREE.Mesh(baseGeo, new THREE.MeshStandardMaterial({ color: 0x1a1a1e, metalness: 0.3, roughness: 0.8 }));
+    base.position.y = -0.2;
+    rig.add(base);
+    const baseEdges = new THREE.LineSegments(new THREE.EdgesGeometry(baseGeo), new THREE.LineBasicMaterial({ color: 0x3a3a42 }));
+    baseEdges.position.y = -0.2;
+    rig.add(baseEdges);
+
+    // Crane
+    const craneGroup = new THREE.Group();
+    const craneMat = new THREE.MeshStandardMaterial({ color: ORANGE, metalness: 0.6, roughness: 0.35, emissive: ORANGE, emissiveIntensity: 0.15 });
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 6.4, 8), craneMat);
+    mast.position.set(-2.9, 3.1, -1.8);
+    craneGroup.add(mast);
+    const jib = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.09, 0.09), craneMat);
+    jib.position.set(-1.0, 6.2, -1.8);
+    craneGroup.add(jib);
+    const counterJib = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.09, 0.09), craneMat);
+    counterJib.position.set(-3.7, 6.2, -1.8);
+    craneGroup.add(counterJib);
+    rig.add(craneGroup);
+
+    const grid = new THREE.GridHelper(16, 16, 0x2a2a30, 0x151519);
+    grid.position.y = -0.3;
+    grid.material.transparent = true;
+    grid.material.opacity = 0.5;
+    scene.add(grid);
+
+    // ---- Worker markers: glowing dots orbiting/climbing between floors ----
+    const WORKER_COUNT = 26;
+    const workerMeshes = [];
+    const workerMat = new THREE.MeshBasicMaterial({ color: ORANGE_LIGHT });
+    for (let i = 0; i < WORKER_COUNT; i++) {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 8), workerMat.clone());
+      const floorIdx = i % floors;
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 0.9 + Math.random() * 0.7;
+      m.userData = {
+        floorIdx, angle, radius,
+        speed: 0.15 + Math.random() * 0.35,
+        bob: Math.random() * Math.PI * 2
+      };
+      m.position.set(Math.cos(angle) * radius, floorYs[floorIdx] + 0.3, Math.sin(angle) * radius * 0.8);
+      workerMeshes.push(m);
+      buildingGroup.add(m);
+    }
+
+    const pCount = 50;
+    const positions = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 13;
+      positions[i * 3 + 1] = Math.random() * 6.5;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 13;
+    }
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const points = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: ORANGE_LIGHT, size: 0.03, transparent: true, opacity: 0.35 }));
+    scene.add(points);
+
+    function resize(){
+      const w = wrap.clientWidth, h = wrap.clientHeight || 260;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let t0 = 0;
+    function animate(){
+      requestAnimationFrame(animate);
+      t0 += 0.008;
+      rig.rotation.y += 0.0022;
+      points.rotation.y += 0.0007;
+      rim.intensity = 2.0 + Math.sin(t0 * 2) * 0.4;
+      camera.position.y = 5.6 + Math.sin(t0 * 0.5) * 0.12;
+      camera.lookAt(0, 2.6, 0);
+
+      workerMeshes.forEach(m=>{
+        const u = m.userData;
+        u.angle += u.speed * 0.02;
+        m.position.x = Math.cos(u.angle) * u.radius;
+        m.position.z = Math.sin(u.angle) * u.radius * 0.8;
+        m.position.y = floorYs[u.floorIdx] + 0.3 + Math.sin(t0 * 2 + u.bob) * 0.05;
+      });
+
+      renderer.render(scene, camera);
+    }
+    animate();
+  })();
+</script>
+</body>
+</html>

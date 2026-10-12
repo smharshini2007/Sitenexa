@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety &amp; Risk Management | SITENEXA</title>
+<script>document.documentElement.classList.add('js');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
+<style>
+  :root{
+    --bg:#08080a; --bg-sidebar:#0c0c0f; --bg-topbar:#0a0a0d;
+    --panel:rgba(255,255,255,0.035); --panel-hover:rgba(255,255,255,0.055);
+    --border:rgba(255,255,255,0.09); --border-soft:rgba(255,255,255,0.06);
+    --orange:#f97316; --orange-light:#fb923c;
+    --orange-dim:rgba(249,115,22,0.14); --orange-glow:rgba(249,115,22,0.35);
+    --green:#22c55e; --green-dim:rgba(34,197,94,0.14);
+    --red:#ef4444; --red-dim:rgba(239,68,68,0.14);
+    --amber:#eab308; --amber-dim:rgba(234,179,8,0.14);
+    --text-1:#f5f5f6; --text-2:#9a9aa3; --text-3:#6b6b74;
+    --radius-lg:20px; --radius-md:14px; --radius-sm:10px;
+    --shadow-card:0 8px 30px rgba(0,0,0,0.35);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{min-height:100%;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 85% -10%, rgba(249,115,22,0.08), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 0% 100%, rgba(249,115,22,0.05), transparent 60%),
+      var(--bg);
+    color:var(--text-1);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  .js .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease;}
+  .js .reveal.in{opacity:1;transform:none;}
+
+  .app{display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{width:260px;flex-shrink:0;background:var(--bg-sidebar);border-right:1px solid var(--border-soft);display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .brand{display:flex;align-items:center;gap:12px;padding:4px 8px 22px;}
+  .brand-icon{width:40px;height:40px;border-radius:11px;background:linear-gradient(145deg,var(--orange-light),#c2410c);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px var(--orange-glow);flex-shrink:0;}
+  .brand-icon svg{width:20px;height:20px;stroke:#0a0a0a;fill:none;stroke-width:2.2;}
+  .brand-name{font-size:16.5px;font-weight:800;letter-spacing:0.4px;}
+  .nav-label{font-size:10.5px;font-weight:700;letter-spacing:1.4px;color:var(--text-3);padding:14px 12px 8px;}
+  .nav{display:flex;flex-direction:column;gap:2px;}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--radius-sm);color:var(--text-2);font-size:14px;font-weight:500;position:relative;transition:background .15s ease,color .15s ease;}
+  .nav-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+  .nav-item:hover{background:var(--panel);color:var(--text-1);}
+  .nav-item.active{background:var(--orange-dim);color:var(--orange-light);font-weight:600;}
+  .nav-item.active::before{content:"";position:absolute;left:-16px;top:8px;bottom:8px;width:3px;background:var(--orange);border-radius:0 4px 4px 0;}
+  .nav-badge{margin-left:auto;background:var(--orange);color:#100800;font-size:11px;font-weight:800;padding:1px 7px;border-radius:20px;}
+  .sidebar-footer{margin-top:auto;padding-top:14px;display:flex;flex-direction:column;gap:10px;}
+  .status-pill{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--panel);border:1px solid var(--border-soft);font-size:12.5px;color:var(--text-2);font-weight:500;}
+  .dot-green{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulseGreen 2.2s ease-in-out infinite;flex-shrink:0;}
+  @keyframes pulseGreen{0%,100%{box-shadow:0 0 6px var(--green);}50%{box-shadow:0 0 14px var(--green);}}
+  .profile-card{display:flex;align-items:center;gap:10px;padding:9px;border-radius:var(--radius-sm);background:var(--panel);border:1px solid var(--border-soft);}
+  .avatar{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:linear-gradient(145deg,var(--orange-light),#c2410c);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#100800;}
+  .profile-name{font-size:13.5px;font-weight:700;}
+  .profile-role{font-size:11.5px;color:var(--text-3);}
+
+  /* MAIN */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 32px;background:var(--bg-topbar);border-bottom:1px solid var(--border-soft);position:sticky;top:0;z-index:30;}
+  .greeting-title{font-size:20px;font-weight:800;}
+  .greeting-sub{font-size:13px;color:var(--text-2);margin-top:2px;}
+  .topbar-right{display:flex;align-items:center;gap:12px;}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;width:240px;color:var(--text-3);font-size:13px;}
+  .search-box svg{width:15px;height:15px;stroke:var(--text-3);fill:none;stroke-width:2;flex-shrink:0;}
+  .icon-btn{width:38px;height:38px;border-radius:var(--radius-sm);background:var(--panel);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .15s;}
+  .icon-btn:hover{background:var(--panel-hover);}
+  .icon-btn svg{width:17px;height:17px;stroke:var(--text-2);fill:none;stroke-width:1.8;}
+  .notif-dot{position:absolute;top:8px;right:9px;width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 6px var(--orange);}
+  .online-pill{display:flex;align-items:center;gap:7px;background:var(--green-dim);border:1px solid rgba(34,197,94,0.3);color:var(--green);font-size:12.5px;font-weight:700;padding:8px 14px;border-radius:20px;white-space:nowrap;}
+  .avatar-top{width:38px;height:38px;border-radius:10px;background:linear-gradient(145deg,var(--orange-light),#c2410c);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#100800;}
+
+  .content{padding:28px 32px 60px;display:flex;flex-direction:column;gap:22px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:24px;}
+  .card-title{font-size:16px;font-weight:800;}
+  .card-sub{font-size:12.5px;color:var(--text-3);margin-top:2px;}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:14px;flex-wrap:wrap;}
+  .link-arrow{color:var(--orange-light);font-size:13px;font-weight:700;}
+  .link-arrow:hover{text-decoration:underline;}
+
+  /* BUTTONS */
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid var(--border);transition:transform .12s ease,box-shadow .12s ease,background .12s ease;white-space:nowrap;color:var(--text-1);background:var(--panel);}
+  .btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.1;}
+  .btn:hover{transform:translateY(-2px);background:var(--panel-hover);}
+  .btn-primary{background:linear-gradient(135deg,var(--orange-light),var(--orange));color:#150900;border:none;box-shadow:0 6px 18px var(--orange-glow);}
+  .btn-primary:hover{background:linear-gradient(135deg,var(--orange-light),var(--orange));box-shadow:0 8px 24px var(--orange-glow);}
+
+  /* HERO (3D) */
+  .hero{position:relative;overflow:hidden;min-height:310px;border-radius:var(--radius-lg);border:1px solid rgba(249,115,22,0.24);background:linear-gradient(160deg,rgba(249,115,22,0.09),rgba(255,255,255,0.02));box-shadow:var(--shadow-card),0 0 60px rgba(249,115,22,0.07);}
+  .hero-canvas-wrap{position:absolute;top:0;bottom:0;right:0;width:68%;}
+  #hero-canvas{width:100%;height:100%;display:block;}
+  .hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(8,8,10,0.92) 0%,rgba(8,8,10,0.75) 32%,rgba(8,8,10,0) 62%);}
+  .hero-inner{position:relative;z-index:2;padding:34px 36px;max-width:560px;display:flex;flex-direction:column;justify-content:center;min-height:310px;}
+  .status-chip{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;background:var(--green-dim);border:1px solid rgba(34,197,94,0.3);color:var(--green);font-size:11.5px;font-weight:700;letter-spacing:0.6px;padding:6px 12px;border-radius:20px;margin-bottom:16px;}
+  .hero h1{font-size:34px;font-weight:800;letter-spacing:-0.4px;line-height:1.12;}
+  .hero p{font-size:14.5px;color:var(--text-2);margin-top:12px;line-height:1.6;max-width:440px;}
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+  .hero-legend{position:absolute;z-index:2;right:22px;bottom:16px;display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--text-2);font-weight:600;}
+  .hero-legend span{display:flex;align-items:center;gap:6px;}
+  .hero-legend i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+  /* SUMMARY */
+  .overview-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+  .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;flex-direction:column;gap:14px;transition:border-color .15s ease,transform .15s ease,box-shadow .15s ease;}
+  .stat-card:hover{border-color:rgba(249,115,22,0.4);transform:translateY(-3px);box-shadow:0 12px 32px rgba(249,115,22,0.12),var(--shadow-card);}
+  .stat-top{display:flex;align-items:center;justify-content:space-between;}
+  .stat-icon{width:40px;height:40px;border-radius:11px;background:var(--orange-dim);display:flex;align-items:center;justify-content:center;}
+  .stat-icon svg{width:19px;height:19px;stroke:var(--orange-light);fill:none;stroke-width:1.9;}
+  .trend-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;}
+  .trend-up{background:var(--green-dim);color:var(--green);}
+  .trend-down{background:var(--red-dim);color:#fca5a5;}
+  .trend-warn{background:var(--amber-dim);color:var(--amber);}
+  .trend-flat{background:rgba(255,255,255,0.06);color:var(--text-2);}
+  .stat-value{font-size:26px;font-weight:800;}
+  .stat-value small{font-size:13px;font-weight:600;color:var(--text-3);}
+  .stat-label{font-size:12.5px;color:var(--text-2);font-weight:500;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:stretch;}
+
+  /* SCORE */
+  .score-wrap{display:grid;grid-template-columns:230px 1fr;gap:30px;align-items:center;}
+  .ring-box{position:relative;width:210px;height:210px;margin:0 auto;}
+  .ring-box svg{width:210px;height:210px;transform:rotate(-90deg);overflow:visible;}
+  .ring-bg{fill:none;stroke:rgba(255,255,255,0.07);stroke-width:13;}
+  .ring-fg{fill:none;stroke:url(#ringGrad);stroke-width:13;stroke-linecap:round;filter:drop-shadow(0 0 8px rgba(249,115,22,0.55));transition:stroke-dashoffset 1.8s cubic-bezier(.16,.84,.44,1);}
+  .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring-num{font-size:52px;font-weight:800;line-height:1;}
+  .ring-num small{font-size:17px;color:var(--text-3);font-weight:600;}
+  .ring-cap{font-size:11.5px;color:var(--text-3);font-weight:700;letter-spacing:1px;margin-top:6px;}
+  .ring-state{margin-top:8px;font-size:11px;font-weight:700;background:var(--green-dim);color:var(--green);padding:3px 10px;border-radius:20px;}
+  .cat-row{margin-bottom:16px;}
+  .cat-row:last-child{margin-bottom:0;}
+  .cat-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px;}
+  .cat-name{font-weight:600;}
+  .cat-pct{font-weight:800;color:var(--text-2);}
+  .bar-outer{height:8px;border-radius:20px;background:rgba(255,255,255,0.06);overflow:hidden;}
+  .bar-inner{height:100%;width:0;border-radius:20px;background:linear-gradient(90deg,var(--orange),var(--orange-light));box-shadow:0 0 10px var(--orange-glow);transition:width 1.4s cubic-bezier(.16,.84,.44,1);}
+
+  /* HAZARD TILES */
+  .hazard-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;}
+  .hz{background:rgba(255,255,255,0.03);border:1px solid var(--border-soft);border-radius:var(--radius-md);padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;transition:border-color .15s,transform .15s;}
+  .hz:hover{border-color:rgba(249,115,22,0.35);transform:translateY(-3px);}
+  .gauge{position:relative;width:78px;height:78px;}
+  .gauge svg{width:78px;height:78px;transform:rotate(-90deg);}
+  .g-bg{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:7;}
+  .g-fg{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset 1.5s cubic-bezier(.16,.84,.44,1);}
+  .g-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;}
+  .hz-name{font-size:12.5px;font-weight:700;}
+  .hz-state{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;}
+  .st-good{background:var(--green-dim);color:var(--green);}
+  .st-watch{background:var(--amber-dim);color:var(--amber);}
+  .st-alert{background:rgba(249,115,22,0.16);color:var(--orange-light);}
+  .hz-active .g-val{font-size:26px;color:var(--orange-light);}
+  .pulse-ring{position:absolute;inset:4px;border-radius:50%;border:2px solid var(--orange);opacity:.5;animation:pulseRing 2.2s ease-out infinite;}
+  @keyframes pulseRing{0%{transform:scale(.75);opacity:.7;}100%{transform:scale(1.15);opacity:0;}}
+
+  /* RISK CARDS */
+  .risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .risk-card{--lc:#22c55e;--lcd:rgba(34,197,94,0.14);background:rgba(255,255,255,0.03);border:1px solid var(--border);border-top:2px solid var(--lc);border-radius:var(--radius-md);padding:18px;display:flex;flex-direction:column;gap:12px;transition:transform .15s,box-shadow .15s;}
+  .risk-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px var(--lcd),var(--shadow-card);}
+  .risk-card.lvl-Medium{--lc:#eab308;--lcd:rgba(234,179,8,0.14);}
+  .risk-card.lvl-High{--lc:#f97316;--lcd:rgba(249,115,22,0.18);}
+  .risk-card.lvl-Critical{--lc:#ef4444;--lcd:rgba(239,68,68,0.2);}
+  .rc-top{display:flex;justify-content:space-between;align-items:center;}
+  .rc-id{font-size:12px;font-weight:700;color:var(--text-3);letter-spacing:.4px;}
+  .lvl-badge{font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;background:var(--lcd);color:var(--lc);}
+  .rc-type{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:800;}
+  .rc-type svg{width:16px;height:16px;stroke:var(--orange-light);fill:none;stroke-width:2;}
+  .rc-project{font-size:12px;color:var(--text-3);margin-top:-6px;}
+  .rc-desc{font-size:12.8px;color:var(--text-2);line-height:1.55;}
+  .rc-meters{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .meter-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);font-weight:700;margin-bottom:5px;}
+  .meter-label b{color:var(--text-1);font-weight:700;}
+  .segs{display:flex;gap:3px;}
+  .segs i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,0.08);}
+  .segs i.on{background:var(--lc);box-shadow:0 0 6px var(--lcd);}
+  .rc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:12px;border-top:1px solid var(--border-soft);}
+  .rc-owner{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;}
+  .mini-av{width:26px;height:26px;border-radius:8px;background:var(--orange-dim);color:var(--orange-light);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;}
+  .badge{display:inline-flex;align-items:center;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+  .b-identified{background:rgba(255,255,255,0.07);color:var(--text-2);}
+  .b-assigned{background:rgba(96,165,250,0.15);color:#93c5fd;}
+  .b-review{background:var(--amber-dim);color:var(--amber);}
+  .b-mitigated{background:var(--green-dim);color:var(--green);}
+  .b-closed{background:rgba(255,255,255,0.05);color:var(--text-3);}
+  .b-open{background:rgba(249,115,22,0.16);color:var(--orange-light);}
+  .b-invest{background:var(--amber-dim);color:var(--amber);}
+  .b-resolved{background:var(--green-dim);color:var(--green);}
+  .sev-Low{background:var(--green-dim);color:var(--green);}
+  .sev-Medium{background:var(--amber-dim);color:var(--amber);}
+  .sev-High{background:rgba(249,115,22,0.16);color:var(--orange-light);}
+  .sev-Critical{background:var(--red-dim);color:#fca5a5;}
+
+  /* MATRIX */
+  .matrix-outer{display:flex;gap:10px;align-items:stretch;}
+  .y-title,.x-title{font-size:10.5px;font-weight:800;letter-spacing:1.4px;color:var(--text-3);}
+  .y-title{writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;align-self:center;}
+  .x-title{text-align:center;margin-top:10px;}
+  .matrix{display:grid;grid-template-columns:auto repeat(5,1fr);gap:6px;flex:1;}
+  .ax-label{font-size:10.5px;color:var(--text-3);font-weight:700;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;white-space:nowrap;}
+  .ax-label.x{justify-content:center;padding:4px 0 0;}
+  .mcell{position:relative;aspect-ratio:1.25/1;min-height:44px;border-radius:10px;border:1px solid transparent;cursor:pointer;color:var(--text-1);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;transition:transform .12s,border-color .12s,box-shadow .12s;}
+  .mcell:hover{transform:scale(1.06);z-index:2;}
+  .mcell.sel{border-color:var(--orange-light);box-shadow:0 0 0 2px rgba(249,115,22,0.35),0 0 18px var(--orange-glow);transform:scale(1.06);z-index:2;}
+  .mc-Low{background:rgba(34,197,94,0.20);}
+  .mc-Medium{background:rgba(234,179,8,0.22);}
+  .mc-High{background:rgba(249,115,22,0.30);}
+  .mc-Critical{background:rgba(239,68,68,0.38);}
+  .mcell .sc{opacity:.45;font-size:11px;}
+  .mcell .cnt{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;border-radius:10px;background:#fff;color:#150900;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 2px 8px rgba(0,0,0,.5);}
+  .matrix-detail{margin-top:18px;padding:16px;border-radius:var(--radius-md);background:rgba(255,255,255,0.03);border:1px solid var(--border-soft);}
+  .md-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .md-title{font-size:13.5px;font-weight:800;}
+  .md-sec{font-size:10.5px;font-weight:800;letter-spacing:1px;color:var(--text-3);margin:10px 0 6px;}
+  .md-item{display:flex;gap:9px;font-size:12.8px;color:var(--text-2);padding:5px 0;line-height:1.5;}
+  .md-item i{width:6px;height:6px;border-radius:50%;background:var(--orange);margin-top:7px;flex-shrink:0;box-shadow:0 0 6px var(--orange-glow);}
+  .md-item b{color:var(--text-1);font-weight:700;}
+
+  /* TIMELINE */
+  .tl{display:flex;flex-direction:column;}
+  .tl-step{display:flex;gap:16px;position:relative;padding-bottom:22px;}
+  .tl-step:last-child{padding-bottom:0;}
+  .tl-step::before{content:"";position:absolute;left:15px;top:32px;bottom:0;width:2px;background:rgba(255,255,255,0.08);}
+  .tl-step:last-child::before{display:none;}
+  .tl-step.done::before{background:linear-gradient(var(--orange),rgba(249,115,22,0.3));}
+  .tl-dot{width:32px;height:32px;border-radius:50%;flex-shrink:0;background:#151517;border:2px solid rgba(255,255,255,0.14);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--text-3);z-index:1;}
+  .tl-step.done .tl-dot{background:var(--orange);border-color:var(--orange);color:#150900;box-shadow:0 0 12px var(--orange-glow);}
+  .tl-step.current .tl-dot{border-color:var(--orange);color:var(--orange-light);box-shadow:0 0 0 4px var(--orange-dim);animation:curPulse 2s ease-in-out infinite;}
+  @keyframes curPulse{0%,100%{box-shadow:0 0 0 4px var(--orange-dim);}50%{box-shadow:0 0 0 8px rgba(249,115,22,0.06);}}
+  .tl-name{font-size:14px;font-weight:700;color:var(--text-2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .tl-step.done .tl-name,.tl-step.current .tl-name{color:var(--text-1);}
+  .tl-desc{font-size:12.3px;color:var(--text-3);margin-top:3px;line-height:1.45;}
+  .tl-tag{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;background:var(--orange-dim);color:var(--orange-light);}
+
+  /* CONTROLS + TABLE */
+  .controls-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+  .ctrl-search{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;flex:1;min-width:200px;max-width:300px;}
+  .ctrl-search svg{width:16px;height:16px;stroke:var(--text-3);fill:none;stroke-width:2;flex-shrink:0;}
+  .ctrl-search input{background:none;border:none;outline:none;color:var(--text-1);font-size:13.5px;width:100%;font-family:inherit;}
+  .ctrl-search input::placeholder{color:var(--text-3);}
+  select.ctrl-select{appearance:none;-webkit-appearance:none;background:var(--panel) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%239a9aa3" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>') no-repeat right 12px center / 14px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 34px 10px 14px;color:var(--text-2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  select.ctrl-select option{background:#131316;color:#f5f5f6;}
+  .spacer{flex:1;}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:900px;}
+  thead th{text-align:left;font-size:11px;font-weight:700;letter-spacing:0.8px;color:var(--text-3);padding:0 14px 12px;border-bottom:1px solid var(--border-soft);white-space:nowrap;}
+  tbody td{padding:14px;border-bottom:1px solid var(--border-soft);font-size:13.3px;vertical-align:middle;}
+  tbody tr{transition:background .12s ease;}
+  tbody tr:hover{background:rgba(255,255,255,0.03);}
+  tbody tr:last-child td{border-bottom:none;}
+  .inc-id{font-weight:800;color:var(--orange-light);}
+  .empty-row td{text-align:center;color:var(--text-3);padding:34px;}
+
+  /* CHARTS */
+  .charts-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .chart-panel{background:rgba(255,255,255,0.025);border:1px solid var(--border-soft);border-radius:var(--radius-md);padding:18px;}
+  .chart-title{font-size:13.5px;font-weight:800;margin-bottom:12px;}
+  .chart-box{position:relative;height:230px;}
+
+  /* AI */
+  .ai-badge{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.8px;color:var(--orange-light);background:var(--orange-dim);border:1px solid rgba(249,115,22,0.3);padding:4px 10px;border-radius:20px;}
+  .insight-row{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--border-soft);}
+  .insight-row:last-of-type{border-bottom:none;}
+  .insight-icon{width:30px;height:30px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .insight-icon svg{width:15px;height:15px;fill:none;stroke-width:2;}
+  .ig{background:var(--green-dim);} .ig svg{stroke:var(--green);}
+  .iw{background:rgba(249,115,22,0.16);} .iw svg{stroke:var(--orange-light);}
+  .insight-title{font-size:13.5px;font-weight:700;}
+  .insight-text{font-size:12.5px;color:var(--text-2);margin-top:2px;line-height:1.5;}
+  .disclaimer{margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.03);border:1px dashed var(--border);font-size:11.8px;color:var(--text-3);line-height:1.5;}
+
+  /* CONTACTS */
+  .contact{display:flex;align-items:center;gap:14px;padding:14px;border-radius:var(--radius-md);background:rgba(255,255,255,0.03);border:1px solid var(--border-soft);margin-bottom:12px;transition:border-color .15s,transform .15s;}
+  .contact:last-child{margin-bottom:0;}
+  .contact:hover{border-color:rgba(249,115,22,0.35);transform:translateX(3px);}
+  .contact.urgent{background:rgba(239,68,68,0.07);border-color:rgba(239,68,68,0.3);}
+  .c-icon{width:40px;height:40px;border-radius:11px;background:var(--orange-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .contact.urgent .c-icon{background:var(--red-dim);}
+  .c-icon svg{width:18px;height:18px;stroke:var(--orange-light);fill:none;stroke-width:1.9;}
+  .contact.urgent .c-icon svg{stroke:#fca5a5;}
+  .c-label{font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--text-3);}
+  .c-name{font-size:14px;font-weight:700;margin-top:2px;}
+  .c-sub{font-size:12px;color:var(--text-2);margin-top:1px;}
+  .c-call{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--orange-light);white-space:nowrap;}
+  .contact.urgent .c-call{color:#fca5a5;}
+
+  /* MODAL + TOAST */
+  .modal-overlay{position:fixed;inset:0;background:rgba(4,4,6,0.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .18s ease;padding:20px;}
+  .modal-overlay.open{opacity:1;pointer-events:auto;}
+  .modal-box{width:480px;max-width:100%;max-height:88vh;overflow-y:auto;background:#0e0e11;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 30px 80px rgba(0,0,0,0.55),0 0 0 1px rgba(249,115,22,0.06);padding:26px;transform:translateY(14px) scale(.98);transition:transform .2s ease;}
+  .modal-overlay.open .modal-box{transform:none;}
+  .modal-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
+  .modal-name{font-size:17px;font-weight:800;}
+  .modal-role{font-size:12.5px;color:var(--text-3);margin-top:2px;}
+  .modal-close{width:32px;height:32px;border-radius:9px;background:var(--panel);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+  .modal-close svg{width:15px;height:15px;stroke:var(--text-2);fill:none;stroke-width:2.2;}
+  .f-label{font-size:10.5px;color:var(--text-3);font-weight:700;letter-spacing:0.5px;margin-bottom:5px;}
+  .f-input{width:100%;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--border);color:var(--text-1);font-size:13.5px;font-family:inherit;outline:none;}
+  .f-input:focus{border-color:rgba(249,115,22,0.5);}
+  .f-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .toast{position:fixed;right:24px;bottom:24px;z-index:200;background:#131316;border:1px solid rgba(249,115,22,0.4);color:var(--text-1);padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 24px rgba(249,115,22,0.15);transform:translateY(20px);opacity:0;pointer-events:none;transition:all .25s ease;}
+  .toast.show{transform:none;opacity:1;}
+
+  @media (max-width:1300px){
+    .hazard-grid{grid-template-columns:repeat(3,1fr);}
+    .risk-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:1200px){
+    .overview-grid{grid-template-columns:repeat(3,1fr);}
+    .two-col,.charts-2{grid-template-columns:1fr;}
+    .hero-canvas-wrap{width:100%;opacity:.75;}
+    .hero::after{background:linear-gradient(90deg,rgba(8,8,10,0.92) 0%,rgba(8,8,10,0.6) 55%,rgba(8,8,10,0.2) 100%);}
+  }
+  @media (max-width:900px){
+    .sidebar{display:none;}
+    .overview-grid{grid-template-columns:repeat(2,1fr);}
+    .search-box,.online-pill{display:none;}
+    .topbar,.content{padding-left:18px;padding-right:18px;}
+    .score-wrap{grid-template-columns:1fr;}
+    .risk-grid{grid-template-columns:1fr;}
+    .hazard-grid{grid-template-columns:repeat(2,1fr);}
+    .hero h1{font-size:26px;}
+    .hero-inner{padding:26px 22px;}
+    .hero-legend{display:none;}
+  }
+  @media (max-width:520px){
+    .overview-grid{grid-template-columns:1fr;}
+    .f-grid{grid-template-columns:1fr;}
+    .greeting-sub{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5Z"/></svg></div>
+      <div class="brand-name">SITENEXA</div>
+    </div>
+    <div class="nav-label">MAIN</div>
+    <nav class="nav">
+      <a class="nav-item" href="Dashboard.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>Dashboard</a>
+      <a class="nav-item" href="project page.html"><svg viewBox="0 0 24 24"><path d="M3 6a1 1 0 0 1 1-1h4.5l1.8 2H20a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6Z"/></svg>Projects</a>
+      <a class="nav-item" href="workforce.html"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.4"/><path d="M22 20c0-2.6-2-4.8-5-5.5"/></svg>Workforce</a>
+      <a class="nav-item" href="materials.html"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>Materials</a>
+      <a class="nav-item" href="site-reports.html"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v2h6V3M8 10h8M8 14h8M8 18h5"/></svg>Site Reports<span class="nav-badge">6</span></a>
+      <a class="nav-item active" href="safety-risk.html"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v6c0 4.6 3.2 8.4 7.5 9 4.3-.6 7.5-4.4 7.5-9V6L12 3Z"/><path d="M12 8.5v4M12 15.6h.01"/></svg>Safety &amp; Risk<span class="nav-badge" id="navBadge">7</span></a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M4 20V10M11 20V4M18 20v-7"/></svg>Analytics</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>Documents</a>
+    </nav>
+    <div class="nav-label">SYSTEM</div>
+    <nav class="nav">
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 1 5 5v3.5l1.6 3.4a1 1 0 0 1-.9 1.4H6.3a1 1 0 0 1-.9-1.4L7 11.5V8a5 5 0 0 1 5-5Z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg>Notifications</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1h-.2a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.6v-.2a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.6 1h.2a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="status-pill"><span class="dot-green"></span> All Systems Operational</div>
+      <div class="profile-card"><div class="avatar">AK</div><div><div class="profile-name">Arjun Kumar</div><div class="profile-role">Site Engineer</div></div></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="greeting-title">Safety &amp; Risk Management</div>
+        <div class="greeting-sub">Identify hazards, monitor safety performance and manage site risks.</div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Search sites, reports...</div>
+        <div class="icon-btn" title="Calendar"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg></div>
+        <div class="icon-btn" title="Notifications"><svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 0 1 5 5v3.5l1.6 3.4a1 1 0 0 1-.9 1.4H6.3a1 1 0 0 1-.9-1.4L7 11.5V8a5 5 0 0 1 5-5Z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg><span class="notif-dot"></span></div>
+        <div class="online-pill"><span class="dot-green"></span> Operations Online</div>
+        <div class="avatar-top">AK</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- HERO -->
+      <section class="hero reveal">
+        <div class="hero-canvas-wrap"><canvas id="hero-canvas"></canvas></div>
+        <div class="hero-inner">
+          <span class="status-chip"><span class="dot-green"></span> SITE SAFETY: STABLE</span>
+          <h1>Safety &amp; Risk Management</h1>
+          <p>Monitor construction site safety, incidents, hazards and project risks in real time across every active build.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary js-report" type="button"><svg viewBox="0 0 24 24" stroke="#150900"><path d="M12 9v4m0 4h.01M10.3 3.9 2.5 17a1.8 1.8 0 0 0 1.5 2.7h16a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0Z"/></svg>Report Safety Issue</button>
+            <a class="btn" href="projectdetail.html">Project Details →</a>
+          </div>
+        </div>
+        <div class="hero-legend">
+          <span><i style="background:#ef4444"></i>Critical</span>
+          <span><i style="background:#f97316"></i>High</span>
+          <span><i style="background:#eab308"></i>Medium</span>
+          <span><i style="background:#22c55e"></i>Safe zone</span>
+        </div>
+      </section>
+
+      <!-- SUMMARY -->
+      <section class="overview-grid">
+        <div class="stat-card reveal">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v6c0 4.6 3.2 8.4 7.5 9 4.3-.6 7.5-4.4 7.5-9V6L12 3Z"/><path d="m9.2 12 2 2 3.6-4"/></svg></div><span class="trend-badge trend-up">▲ 2 pts</span></div>
+          <div class="stat-value"><span data-count="92">0</span> <small>/ 100</small></div>
+          <div class="stat-label">Safety Score</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 2.5 17a1.8 1.8 0 0 0 1.5 2.7h16a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0Z"/></svg></div><span class="trend-badge trend-warn">Needs action</span></div>
+          <div class="stat-value" id="openIssues" data-count="7">0</div>
+          <div class="stat-label">Open Safety Issues</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><span class="trend-badge trend-up">▼ 1 vs last</span></div>
+          <div class="stat-value" data-count="2">0</div>
+          <div class="stat-label">Incidents This Month</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg></div><span class="trend-badge trend-up">▲ 6 this month</span></div>
+          <div class="stat-value" data-count="38">0</div>
+          <div class="stat-label">Resolved Issues</div>
+        </div>
+        <div class="stat-card reveal">
+          <div class="stat-top"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 2s5 4.5 5 9a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-8Z"/></svg></div><span class="trend-badge trend-down">Priority</span></div>
+          <div class="stat-value" data-count="3">0</div>
+          <div class="stat-label">High Risk Items</div>
+        </div>
+      </section>
+
+      <!-- SAFETY SCORE -->
+      <section class="card reveal">
+        <div class="card-head">
+          <div><div class="card-title">Safety Score</div><div class="card-sub">Composite score across five safety performance categories</div></div>
+        </div>
+        <div class="score-wrap">
+          <div class="ring-box">
+            <svg viewBox="0 0 210 210">
+              <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fdba74"/><stop offset="100%" stop-color="#f97316"/></linearGradient></defs>
+              <circle class="ring-bg" cx="105" cy="105" r="90"/>
+              <circle class="ring-fg" id="ringFg" cx="105" cy="105" r="90" stroke-dasharray="565.5" stroke-dashoffset="565.5"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-num"><span id="ringNum">0</span><small>/100</small></div>
+              <div class="ring-cap">SAFETY SCORE</div>
+              <div class="ring-state">STABLE</div>
+            </div>
+          </div>
+          <div id="catList"></div>
+        </div>
+      </section>
+
+      <!-- HAZARD MONITORING -->
+      <section class="card reveal">
+        <div class="card-head">
+          <div><div class="card-title">Hazard Monitoring</div><div class="card-sub">Live compliance indicators across site safety domains</div></div>
+        </div>
+        <div class="hazard-grid" id="hazardGrid"></div>
+      </section>
+
+      <!-- RISK MONITORING -->
+      <section class="card reveal">
+        <div class="card-head">
+          <div><div class="card-title">Risk Monitoring</div><div class="card-sub">Active risk register across all projects</div></div>
+          <a class="link-arrow" href="projectdetail.html">View project details →</a>
+        </div>
+        <div class="risk-grid" id="riskGrid"></div>
+      </section>
+
+      <!-- MATRIX + TIMELINE -->
+      <div class="two-col">
+        <section class="card reveal">
+          <div class="card-head">
+            <div><div class="card-title">Risk Matrix</div><div class="card-sub">Click any cell to see example risks · white badges show registered risks</div></div>
+          </div>
+          <div class="matrix-outer">
+            <div class="y-title">PROBABILITY</div>
+            <div style="flex:1;min-width:0;">
+              <div class="matrix" id="matrix"></div>
+              <div class="x-title">IMPACT →</div>
+            </div>
+          </div>
+          <div class="matrix-detail" id="matrixDetail"></div>
+        </section>
+
+        <section class="card reveal">
+          <div class="card-head">
+            <div><div class="card-title">Safety Inspection Timeline</div><div class="card-sub">INS-0912 · Level 8 façade scaffolding</div></div>
+          </div>
+          <div class="tl" id="timeline"></div>
+        </section>
+      </div>
+
+      <!-- INCIDENTS -->
+      <section class="card reveal">
+        <div class="card-head">
+          <div><div class="card-title">Safety Incident Log</div><div class="card-sub" id="incCount">Showing 0 incidents</div></div>
+        </div>
+        <div class="controls-bar">
+          <div class="ctrl-search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="incSearch" type="text" placeholder="Search incident, type, location..." aria-label="Search incidents">
+          </div>
+          <select id="incProject" class="ctrl-select" aria-label="Project filter">
+            <option value="">All Projects</option><option>Metro Tower</option><option>Harbor Bridge</option><option>Green Valley Residency</option><option>Lakeview Mall</option>
+          </select>
+          <select id="incSeverity" class="ctrl-select" aria-label="Severity filter">
+            <option value="">All Severity</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
+          </select>
+          <select id="incStatus" class="ctrl-select" aria-label="Status filter">
+            <option value="">All Status</option><option>Open</option><option>Investigating</option><option>Resolved</option><option>Closed</option>
+          </select>
+          <div class="spacer"></div>
+          <button class="btn" id="exportBtn" type="button"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>Export Safety Report</button>
+          <button class="btn btn-primary js-report" type="button"><svg viewBox="0 0 24 24" stroke="#150900"><path d="M12 5v14M5 12h14"/></svg>Report Safety Issue</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Incident ID</th><th>Date</th><th>Project</th><th>Type</th><th>Location</th><th>Severity</th><th>Reported By</th><th>Status</th></tr></thead>
+            <tbody id="incBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ANALYTICS -->
+      <section class="card reveal">
+        <div class="card-head">
+          <div><div class="card-title">Safety Analytics</div><div class="card-sub">Incident, risk and compliance trends</div></div>
+        </div>
+        <div class="charts-2">
+          <div class="chart-panel"><div class="chart-title">Safety Incidents by Month</div><div class="chart-box"><canvas id="chIncidents"></canvas></div></div>
+          <div class="chart-panel"><div class="chart-title">Risk Distribution</div><div class="chart-box"><canvas id="chRisk"></canvas></div></div>
+          <div class="chart-panel"><div class="chart-title">PPE Compliance Trend</div><div class="chart-box"><canvas id="chPPE"></canvas></div></div>
+          <div class="chart-panel"><div class="chart-title">Safety Score Trend</div><div class="chart-box"><canvas id="chScore"></canvas></div></div>
+        </div>
+      </section>
+
+      <!-- AI + EMERGENCY -->
+      <div class="two-col">
+        <section class="card reveal">
+          <div class="card-head">
+            <div><div class="card-title">AI Safety Insights</div><div class="card-sub">Decision-support suggestions from site &amp; incident data</div></div>
+            <span class="ai-badge">✦ AI ASSIST</span>
+          </div>
+          <div class="insight-row"><div class="insight-icon ig"><svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg></div><div><div class="insight-title">Overall site safety performance appears stable</div><div class="insight-text">The composite score has moved from 84 to 92 over six months, with no upward trend in incident frequency.</div></div></div>
+          <div class="insight-row"><div class="insight-icon ig"><svg viewBox="0 0 24 24"><path d="M4 20V10M11 20V4M18 20v-7"/></svg></div><div><div class="insight-title">PPE compliance has improved this month</div><div class="insight-text">Compliance rose to 94%, suggesting recent toolbox talks and gate checks may be having an effect.</div></div></div>
+          <div class="insight-row"><div class="insight-icon iw"><svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 2.5 17a1.8 1.8 0 0 0 1.5 2.7h16a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0Z"/></svg></div><div><div class="insight-title">Three high-risk items may require corrective action</div><div class="insight-text">Scaffold tie-ins, equipment inspection and crew fatigue are the items currently rated High or Critical.</div></div></div>
+          <div class="insight-row"><div class="insight-icon iw"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div><div><div class="insight-title">Consider completing scaffolding inspection first</div><div class="insight-text">Verifying Level 8 scaffolding before the next major work activity could reduce exposure to fall hazards.</div></div></div>
+          <div class="insight-row"><div class="insight-icon iw"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg></div><div><div class="insight-title">Recent incidents cluster around material handling</div><div class="insight-text">Several recent reports involve lifting and unloading; a refresher briefing for handling crews may be worth considering.</div></div></div>
+          <div class="disclaimer">These insights are decision-support suggestions generated for this prototype. They are not guaranteed safety predictions and do not replace site inspections, qualified safety officers or statutory procedures.</div>
+        </section>
+
+        <section class="card reveal">
+          <div class="card-head">
+            <div><div class="card-title">Emergency Contacts</div><div class="card-sub">Metro Tower · Chennai — keep this list accessible on site</div></div>
+          </div>
+          <div class="contact">
+            <div class="c-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v6c0 4.6 3.2 8.4 7.5 9 4.3-.6 7.5-4.4 7.5-9V6L12 3Z"/></svg></div>
+            <div><div class="c-label">SITE SAFETY OFFICER</div><div class="c-name">Anitha Ramesh</div><div class="c-sub">On duty · 07:00 – 17:00</div></div>
+            <a class="c-call" href="tel:+919876512012">+91 98765 12012</a>
+          </div>
+          <div class="contact urgent">
+            <div class="c-icon"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></div>
+            <div><div class="c-label">EMERGENCY CONTACT</div><div class="c-name">National Emergency · 112</div><div class="c-sub">Ambulance: 108</div></div>
+            <a class="c-call" href="tel:112">Call 112</a>
+          </div>
+          <div class="contact">
+            <div class="c-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/></svg></div>
+            <div><div class="c-label">FIRST AID STATION</div><div class="c-name">Gate 2 · Ground Floor</div><div class="c-sub">Trained first-aiders on every shift</div></div>
+            <span class="c-call">Ext. 214</span>
+          </div>
+          <div class="contact">
+            <div class="c-icon"><svg viewBox="0 0 24 24"><path d="M4 21V8l8-5 8 5v13M9 21v-6h6v6M12 9v3M10.5 10.5h3"/></svg></div>
+            <div><div class="c-label">NEAREST HOSPITAL</div><div class="c-name">City General Hospital</div><div class="c-sub">Approx. 2.4 km · about 8 min by road</div></div>
+            <span class="c-call">2.4 km</span>
+          </div>
+          <div class="contact">
+            <div class="c-icon"><svg viewBox="0 0 24 24"><path d="M12 21s7-5.6 7-11a7 7 0 0 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+            <div><div class="c-label">EMERGENCY ASSEMBLY POINT</div><div class="c-name">Assembly Point A</div><div class="c-sub">North parking yard · beside Gate 1</div></div>
+            <span class="c-call">Zone A</span>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- REPORT MODAL -->
+<div class="modal-overlay" id="reportModal" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-label="Report Safety Issue">
+    <div class="modal-head">
+      <div><div class="modal-name">Report Safety Issue</div><div class="modal-role">Log a new hazard or incident for review</div></div>
+      <div class="modal-close" id="reportClose" role="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+    </div>
+    <form id="reportForm" style="display:flex;flex-direction:column;gap:12px;">
+      <div><div class="f-label">ISSUE TYPE</div>
+        <select id="rType" class="f-input"><option>PPE violation</option><option>Minor equipment injury</option><option>Unsafe scaffolding</option><option>Electrical hazard</option><option>Material handling issue</option></select></div>
+      <div class="f-grid">
+        <div><div class="f-label">PROJECT</div><select id="rProject" class="f-input"><option>Metro Tower</option><option>Harbor Bridge</option><option>Green Valley Residency</option><option>Lakeview Mall</option></select></div>
+        <div><div class="f-label">SEVERITY</div><select id="rSeverity" class="f-input"><option>Low</option><option selected>Medium</option><option>High</option><option>Critical</option></select></div>
+      </div>
+      <div><div class="f-label">LOCATION</div><input id="rLocation" class="f-input" type="text" placeholder="e.g. Level 6, East Stair Core" required></div>
+      <div><div class="f-label">DESCRIPTION (OPTIONAL)</div><input id="rDesc" class="f-input" type="text" placeholder="Brief description of the hazard"></div>
+      <button type="submit" class="btn btn-primary" style="justify-content:center;margin-top:6px;">Submit Report</button>
+    </form>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  var LVL = ['Very Low','Low','Medium','High','Critical'];
+  function lvlOf(p,i){ var s=p*i; return s>=20?'Critical':s>=12?'High':s>=6?'Medium':'Low'; }
+  function initials(n){ return n.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase(); }
+
+  /* ---------- Reveal on scroll ---------- */
+  var reveals = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var ro = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); ro.unobserve(e.target); } });
+    },{threshold:0.08});
+    reveals.forEach(function(el,i){ el.style.transitionDelay=(i%5)*60+'ms'; ro.observe(el); });
+  } else { reveals.forEach(function(el){ el.classList.add('in'); }); }
+
+  /* ---------- Counters ---------- */
+  function countUp(el, target){
+    var start=null, dur=1400;
+    function step(ts){
+      if(!start) start=ts;
+      var p=Math.min((ts-start)/dur,1), eased=1-Math.pow(1-p,3);
+      el.textContent=Math.round(target*eased);
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  document.querySelectorAll('[data-count]').forEach(function(el){ countUp(el, +el.getAttribute('data-count')); });
+
+  /* ---------- Toast ---------- */
+  var toastTimer;
+  function toast(msg){
+    var t=$('toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove('show'); },2600);
+  }
+
+  /* ---------- Safety score + categories ---------- */
+  var cats = [
+    {n:'PPE Compliance',v:94},{n:'Site Inspection',v:90},{n:'Worker Training',v:88},
+    {n:'Equipment Safety',v:91},{n:'Emergency Preparedness',v:96}
+  ];
+  $('catList').innerHTML = cats.map(function(c){
+    return '<div class="cat-row"><div class="cat-top"><span class="cat-name">'+c.n+'</span><span class="cat-pct">'+c.v+'%</span></div>'+
+           '<div class="bar-outer"><div class="bar-inner" data-w="'+c.v+'"></div></div></div>';
+  }).join('');
+
+  function animateScore(){
+    var circ = 2*Math.PI*90;
+    var fg=$('ringFg');
+    fg.setAttribute('stroke-dasharray', circ);
+    fg.setAttribute('stroke-dashoffset', circ);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ fg.setAttribute('stroke-dashoffset', circ*(1-0.92)); }); });
+    countUp($('ringNum'),92);
+    document.querySelectorAll('.bar-inner').forEach(function(b){ b.style.width=b.getAttribute('data-w')+'%'; });
+  }
+  var scoreCard = $('ringFg').closest('.card');
+  if('IntersectionObserver' in window){
+    var so = new IntersectionObserver(function(en){ if(en[0].isIntersecting){ animateScore(); so.disconnect(); } },{threshold:0.25});
+    so.observe(scoreCard);
+  } else { animateScore(); }
+
+  /* ---------- Hazard monitoring ---------- */
+  var hazards = [
+    {n:'Active Hazards',v:7,type:'count'},
+    {n:'PPE Compliance',v:94},
+    {n:'Scaffolding Safety',v:78},
+    {n:'Electrical Safety',v:91},
+    {n:'Fire Safety',v:97},
+    {n:'Material Storage',v:85}
+  ];
+  function hzState(v){ return v>=90?['Good','st-good','#22c55e']:v>=82?['Watch','st-watch','#eab308']:['Action Needed','st-alert','#f97316']; }
+  var circG = 2*Math.PI*34;
+  $('hazardGrid').innerHTML = hazards.map(function(h){
+    if(h.type==='count'){
+      return '<div class="hz hz-active"><div class="gauge"><div class="pulse-ring"></div><div class="g-val">'+h.v+'</div></div>'+
+             '<div class="hz-name">'+h.n+'</div><span class="hz-state st-alert">Under Review</span></div>';
+    }
+    var s=hzState(h.v);
+    return '<div class="hz"><div class="gauge"><svg viewBox="0 0 78 78"><circle class="g-bg" cx="39" cy="39" r="34"/>'+
+           '<circle class="g-fg" data-pct="'+h.v+'" cx="39" cy="39" r="34" stroke="'+s[2]+'" stroke-dasharray="'+circG+'" stroke-dashoffset="'+circG+'"/></svg>'+
+           '<div class="g-val">'+h.v+'%</div></div><div class="hz-name">'+h.n+'</div><span class="hz-state '+s[1]+'">'+s[0]+'</span></div>';
+  }).join('');
+  function animateGauges(){
+    document.querySelectorAll('.g-fg').forEach(function(g){
+      g.setAttribute('stroke-dashoffset', circG*(1-(+g.getAttribute('data-pct'))/100));
+    });
+  }
+  var hg = $('hazardGrid');
+  if('IntersectionObserver' in window){
+    var go = new IntersectionObserver(function(en){ if(en[0].isIntersecting){ animateGauges(); go.disconnect(); } },{threshold:0.2});
+    go.observe(hg);
+  } else { animateGauges(); }
+
+  /* ---------- Risk register ---------- */
+  var typeIcons = {
+    'Safety Hazard':'<path d="M12 9v4m0 4h.01M10.3 3.9 2.5 17a1.8 1.8 0 0 0 1.5 2.7h16a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0Z"/>',
+    'Material Risk':'<path d="M12 3 4 7v10l8 4 8-4V7l-8-4Z"/><path d="M4 7l8 4 8-4M12 11v10"/>',
+    'Schedule Risk':'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    'Equipment Risk':'<circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+    'Workforce Risk':'<circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.4"/>',
+    'Environmental Risk':'<path d="M6 20c8 0 12-5 12-14C10 6 6 10 6 20Z"/><path d="M6 20c2-6 5-9 9-11"/>'
+  };
+  var risks = [
+    {id:'RSK-2041',type:'Safety Hazard',project:'Metro Tower',desc:'Loose tie-ins and missing toe boards on Level 8 east façade scaffolding.',p:4,i:5,owner:'Anitha Ramesh',status:'Under Review'},
+    {id:'RSK-2042',type:'Material Risk',project:'Harbor Bridge',desc:'Rebar delivery delay may stall Pier 3 reinforcement work.',p:3,i:3,owner:'Lakshmi Devi',status:'Assigned'},
+    {id:'RSK-2043',type:'Schedule Risk',project:'Metro Tower',desc:'Electrical phase start may slip about 4 days due to a vendor delay.',p:3,i:2,owner:'Priya Natarajan',status:'Identified'},
+    {id:'RSK-2044',type:'Equipment Risk',project:'Lakeview Mall',desc:'Tower crane wire-rope inspection is overdue against the service schedule.',p:4,i:3,owner:'Rajesh Kumar',status:'Assigned'},
+    {id:'RSK-2045',type:'Workforce Risk',project:'Green Valley Residency',desc:'Extended shifts raising fatigue exposure for masonry crews.',p:3,i:4,owner:'Gopal Krishnan',status:'Mitigated'},
+    {id:'RSK-2046',type:'Environmental Risk',project:'Harbor Bridge',desc:'Monsoon run-off may affect the excavation edge near Pier 2.',p:2,i:3,owner:'Meena Venkatesh',status:'Closed'}
+  ];
+  var statusClass = {'Identified':'b-identified','Assigned':'b-assigned','Under Review':'b-review','Mitigated':'b-mitigated','Closed':'b-closed'};
+  function segs(n){ var s=''; for(var k=1;k<=5;k++) s+='<i class="'+(k<=n?'on':'')+'"></i>'; return s; }
+  $('riskGrid').innerHTML = risks.map(function(r){
+    var lv=lvlOf(r.p,r.i);
+    return '<div class="risk-card lvl-'+lv+'">'+
+      '<div class="rc-top"><span class="rc-id">'+r.id+'</span><span class="lvl-badge">'+lv+'</span></div>'+
+      '<div class="rc-type"><svg viewBox="0 0 24 24">'+typeIcons[r.type]+'</svg>'+r.type+'</div>'+
+      '<div class="rc-project">'+r.project+'</div>'+
+      '<p class="rc-desc">'+r.desc+'</p>'+
+      '<div class="rc-meters">'+
+        '<div><div class="meter-label">Probability <b>'+LVL[r.p-1]+'</b></div><div class="segs">'+segs(r.p)+'</div></div>'+
+        '<div><div class="meter-label">Impact <b>'+LVL[r.i-1]+'</b></div><div class="segs">'+segs(r.i)+'</div></div>'+
+      '</div>'+
+      '<div class="rc-foot"><div class="rc-owner"><span class="mini-av">'+initials(r.owner)+'</span>'+r.owner+'</div>'+
+      '<span class="badge '+statusClass[r.status]+'">'+r.status+'</span></div></div>';
+  }).join('');
+
+  /* ---------- Risk matrix ---------- */
+  var examples = {
+    Low:['Minor housekeeping lapses in storage areas','Small tools left unsecured after shift'],
+    Medium:['Intermittent PPE non-compliance among new crews','Short material delivery delays affecting a work front'],
+    High:['Unbarricaded excavation edge near a site access road','Overloaded temporary power distribution board'],
+    Critical:['Scaffold instability during high winds','Crane load path crossing an occupied work zone']
+  };
+  var sel = {p:4,i:5};
+  function renderMatrix(){
+    var html='';
+    for(var p=5;p>=1;p--){
+      html+='<div class="ax-label">'+LVL[p-1]+'</div>';
+      for(var i=1;i<=5;i++){
+        var lv=lvlOf(p,i);
+        var cnt=risks.filter(function(r){return r.p===p&&r.i===i;}).length;
+        html+='<button type="button" class="mcell mc-'+lv+(sel.p===p&&sel.i===i?' sel':'')+'" data-p="'+p+'" data-i="'+i+'" aria-label="Probability '+LVL[p-1]+', Impact '+LVL[i-1]+', '+lv+' risk">'+
+              '<span class="sc">'+(p*i)+'</span>'+(cnt?'<span class="cnt">'+cnt+'</span>':'')+'</button>';
+      }
+    }
+    html+='<div></div>';
+    for(var k=0;k<5;k++) html+='<div class="ax-label x">'+LVL[k]+'</div>';
+    $('matrix').innerHTML=html;
+    $('matrix').querySelectorAll('.mcell').forEach(function(c){
+      c.addEventListener('click',function(){ sel={p:+c.getAttribute('data-p'),i:+c.getAttribute('data-i')}; renderMatrix(); });
+    });
+    var lv=lvlOf(sel.p,sel.i);
+    var reg=risks.filter(function(r){return r.p===sel.p&&r.i===sel.i;});
+    var d='<div class="md-head"><div class="md-title">Probability: '+LVL[sel.p-1]+' × Impact: '+LVL[sel.i-1]+'</div><span class="badge sev-'+lv+'">'+lv+' · Score '+(sel.p*sel.i)+'</span></div>';
+    d+='<div class="md-sec">REGISTERED RISKS</div>';
+    d+= reg.length ? reg.map(function(r){return '<div class="md-item"><i></i><span><b>'+r.id+'</b> · '+r.type+' — '+r.desc+'</span></div>';}).join('') :
+        '<div class="md-item"><i></i><span>No registered risks in this cell.</span></div>';
+    d+='<div class="md-sec">EXAMPLE RISKS AT THIS LEVEL</div>';
+    d+=examples[lv].map(function(e){return '<div class="md-item"><i></i><span>'+e+'</span></div>';}).join('');
+    $('matrixDetail').innerHTML=d;
+  }
+  renderMatrix();
+
+  /* ---------- Timeline ---------- */
+  var steps = [
+    {n:'Inspection Scheduled',d:'22 Sep · Level 8 façade scaffolding added to inspection plan',s:'done'},
+    {n:'Site Inspection',d:'24 Sep · Walk-down completed by the safety team',s:'done'},
+    {n:'Hazard Identified',d:'24 Sep · Loose tie-ins and missing toe boards logged (RSK-2041)',s:'done'},
+    {n:'Corrective Action',d:'Due 30 Sep · Re-tie and re-tag scaffold sections',s:'current'},
+    {n:'Verification',d:'Pending · Re-inspection by the Site Safety Officer',s:'todo'},
+    {n:'Issue Closed',d:'Pending · Sign-off and risk register update',s:'todo'}
+  ];
+  $('timeline').innerHTML = steps.map(function(s,idx){
+    return '<div class="tl-step '+s.s+'"><div class="tl-dot">'+(s.s==='done'?'✓':(idx+1))+'</div><div><div class="tl-name">'+s.n+(s.s==='current'?' <span class="tl-tag">IN PROGRESS</span>':'')+'</div><div class="tl-desc">'+s.d+'</div></div></div>';
+  }).join('');
+
+  /* ---------- Incidents ---------- */
+  var incidents = [
+    {id:'SI-0318',date:'24 Sep 2026',project:'Metro Tower',type:'Minor equipment injury',loc:'Level 6 · Cutting Bay',sev:'Medium',by:'Rajesh Kumar',status:'Investigating'},
+    {id:'SI-0317',date:'19 Sep 2026',project:'Lakeview Mall',type:'Material handling issue',loc:'Loading Bay 2',sev:'Medium',by:'Farooq Ahmed',status:'Open'},
+    {id:'SI-0316',date:'29 Aug 2026',project:'Metro Tower',type:'Unsafe scaffolding',loc:'Level 8 · East Façade',sev:'High',by:'Anitha Ramesh',status:'Open'},
+    {id:'SI-0315',date:'21 Aug 2026',project:'Green Valley Residency',type:'PPE violation',loc:'Block C · Level 2',sev:'Low',by:'Priya Natarajan',status:'Resolved'},
+    {id:'SI-0314',date:'14 Aug 2026',project:'Harbor Bridge',type:'Electrical hazard',loc:'Pier 3 · Temp. Panel',sev:'High',by:'Lakshmi Devi',status:'Resolved'},
+    {id:'SI-0313',date:'02 Aug 2026',project:'Metro Tower',type:'Material handling issue',loc:'Gate 2 · Unloading',sev:'Low',by:'Vignesh Muthu',status:'Closed'},
+    {id:'SI-0312',date:'27 Jul 2026',project:'Lakeview Mall',type:'PPE violation',loc:'Level 1 · Slab Edge',sev:'Medium',by:'Meena Venkatesh',status:'Closed'},
+    {id:'SI-0311',date:'18 Jul 2026',project:'Green Valley Residency',type:'Electrical hazard',loc:'Block A · DB Room',sev:'Critical',by:'Gopal Krishnan',status:'Resolved'},
+    {id:'SI-0310',date:'09 Jul 2026',project:'Harbor Bridge',type:'Unsafe scaffolding',loc:'Pier 2 · Access Tower',sev:'Medium',by:'Karthik Iyer',status:'Closed'}
+  ];
+  var incStatusClass={'Open':'b-open','Investigating':'b-invest','Resolved':'b-resolved','Closed':'b-closed'};
+  function renderInc(){
+    var q=$('incSearch').value.trim().toLowerCase(), pf=$('incProject').value, sf=$('incSeverity').value, st=$('incStatus').value;
+    var list=incidents.filter(function(x){
+      if(q && (x.id+' '+x.type+' '+x.loc+' '+x.project+' '+x.by).toLowerCase().indexOf(q)===-1) return false;
+      if(pf && x.project!==pf) return false;
+      if(sf && x.sev!==sf) return false;
+      if(st && x.status!==st) return false;
+      return true;
+    });
+    $('incCount').textContent='Showing '+list.length+' of '+incidents.length+' incidents';
+    $('incBody').innerHTML = list.length ? list.map(function(x){
+      return '<tr><td class="inc-id">'+x.id+'</td><td>'+x.date+'</td><td>'+x.project+'</td><td>'+x.type+'</td><td>'+x.loc+'</td>'+
+             '<td><span class="badge sev-'+x.sev+'">'+x.sev+'</span></td><td>'+x.by+'</td><td><span class="badge '+incStatusClass[x.status]+'">'+x.status+'</span></td></tr>';
+    }).join('') : '<tr class="empty-row"><td colspan="8">No incidents match the current filters.</td></tr>';
+  }
+  ['incSearch','incProject','incSeverity','incStatus'].forEach(function(id){
+    $(id).addEventListener('input',renderInc); $(id).addEventListener('change',renderInc);
+  });
+  renderInc();
+
+  /* Export CSV */
+  $('exportBtn').addEventListener('click',function(){
+    var rows=[['Incident ID','Date','Project','Type','Location','Severity','Reported By','Status']];
+    incidents.forEach(function(x){ rows.push([x.id,x.date,x.project,x.type,x.loc,x.sev,x.by,x.status]); });
+    var csv=rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+    var blob=new Blob([csv],{type:'text/csv'}), url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download='safety-report.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); },500);
+    toast('Safety report exported');
+  });
+
+  /* Report modal */
+  var rm=$('reportModal');
+  function openReport(){ rm.classList.add('open'); rm.setAttribute('aria-hidden','false'); }
+  function closeReport(){ rm.classList.remove('open'); rm.setAttribute('aria-hidden','true'); }
+  document.querySelectorAll('.js-report').forEach(function(b){ b.addEventListener('click',openReport); });
+  $('reportClose').addEventListener('click',closeReport);
+  rm.addEventListener('click',function(e){ if(e.target===rm) closeReport(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeReport(); });
+  $('reportForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var next=318+incidents.length-8;
+    var d=new Date();
+    var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    incidents.unshift({
+      id:'SI-0'+next, date:('0'+d.getDate()).slice(-2)+' '+months[d.getMonth()]+' '+d.getFullYear(),
+      project:$('rProject').value, type:$('rType').value, loc:$('rLocation').value.trim()||'—',
+      sev:$('rSeverity').value, by:'Arjun Kumar', status:'Open'
+    });
+    var oi=$('openIssues'); var n=(parseInt(oi.textContent,10)||0)+1; oi.textContent=n; $('navBadge').textContent=n;
+    $('reportForm').reset(); closeReport(); renderInc(); toast('Safety issue reported and added to the log');
+  });
+
+  /* ---------- Charts ---------- */
+  if(typeof Chart!=='undefined'){
+    Chart.defaults.color='#9a9aa3';
+    Chart.defaults.font.family="'Inter',sans-serif";
+    var grid='rgba(255,255,255,0.06)';
+    var months6=['Apr','May','Jun','Jul','Aug','Sep'];
+    new Chart($('chIncidents'),{type:'bar',data:{labels:months6,datasets:[{label:'Incidents',data:[5,4,6,3,4,2],backgroundColor:'#f97316',borderRadius:6,maxBarThickness:34}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:grid},beginAtZero:true,ticks:{stepSize:2}}}}});
+    new Chart($('chRisk'),{type:'doughnut',data:{labels:['Low','Medium','High','Critical'],datasets:[{data:[12,9,2,1],backgroundColor:['#22c55e','#eab308','#f97316','#ef4444'],borderColor:'#0e0e11',borderWidth:3}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right',labels:{boxWidth:10,font:{size:11},padding:12}}}}});
+    var ppeGrad=null;
+    new Chart($('chPPE'),{type:'line',data:{labels:['W1','W2','W3','W4','W5','W6','W7','W8'],datasets:[{label:'PPE Compliance %',data:[86,87,88,89,91,92,93,94],borderColor:'#f97316',backgroundColor:'rgba(249,115,22,0.14)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#f97316'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:grid}},y:{grid:{color:grid},min:80,max:100}}}});
+    new Chart($('chScore'),{type:'line',data:{labels:months6,datasets:[{label:'Safety Score',data:[84,86,87,89,90,92],borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,0.14)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#fb923c'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:grid}},y:{grid:{color:grid},min:75,max:100}}}});
+  }
+
+  /* ---------- Three.js hero ---------- */
+  (function(){
+    if(typeof THREE==='undefined') return;
+    var canvas=$('hero-canvas'), wrap=canvas.parentElement, renderer;
+    try{
+      renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true});
+    }catch(err){ wrap.style.display='none'; return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setClearColor(0x000000,0);
+
+    var scene=new THREE.Scene();
+    scene.fog=new THREE.FogExp2(0x08080a,0.04);
+    var camera=new THREE.PerspectiveCamera(40,1,0.1,100);
+
+    var ORANGE=0xf97316, ORANGE_L=0xfdba74, STEEL=0x2b2b31, GLASS=0x11131a;
+    scene.add(new THREE.AmbientLight(0x8b8b95,0.55));
+    var key=new THREE.DirectionalLight(0xfff2e0,1.1); key.position.set(6,10,4); scene.add(key);
+    var rim=new THREE.PointLight(ORANGE,2.2,18,2); rim.position.set(-3,5,-2); scene.add(rim);
+    var fill=new THREE.PointLight(0x4a6fff,0.45,16,2); fill.position.set(4,2,-5); scene.add(fill);
+
+    var rig=new THREE.Group(); scene.add(rig);
+
+    /* Tower */
+    var floors=9, tower=new THREE.Group();
+    for(var f=0;f<floors;f++){
+      var t=f/(floors-1), w=2.7-t*0.5, d=2.0-t*0.35, y=f*0.62;
+      var sg=new THREE.BoxGeometry(w,0.5,d);
+      var slab=new THREE.Mesh(sg,new THREE.MeshStandardMaterial({color:STEEL,metalness:0.55,roughness:0.4}));
+      slab.position.y=y; tower.add(slab);
+      var glass=new THREE.Mesh(new THREE.BoxGeometry(w*1.002,0.16,d*1.002),new THREE.MeshStandardMaterial({color:GLASS,metalness:0.2,roughness:0.15,emissive:(f%3===0)?ORANGE:0x000000,emissiveIntensity:(f%3===0)?0.5:0}));
+      glass.position.y=y+0.18; tower.add(glass);
+      if(f<7){
+        var el=new THREE.LineSegments(new THREE.EdgesGeometry(sg),new THREE.LineBasicMaterial({color:ORANGE_L,transparent:true,opacity:0.5}));
+        el.position.y=y; tower.add(el);
+      }
+    }
+    rig.add(tower);
+    var baseG=new THREE.BoxGeometry(4.2,0.18,3.6);
+    var base=new THREE.Mesh(baseG,new THREE.MeshStandardMaterial({color:0x1a1a1e,metalness:0.3,roughness:0.8})); base.position.y=-0.2; rig.add(base);
+
+    /* Scaffolding */
+    var pts=[], zS=1.3, xs=[-1.5,-0.9,-0.3,0.3,0.9,1.5], top=4.3, lvl;
+    xs.forEach(function(x){ pts.push(new THREE.Vector3(x,-0.1,zS),new THREE.Vector3(x,top,zS)); });
+    for(lvl=0;lvl<=7;lvl++){ var yy=-0.1+lvl*0.63; pts.push(new THREE.Vector3(xs[0],yy,zS),new THREE.Vector3(xs[5],yy,zS)); }
+    for(var b=0;b<xs.length-1;b++){ for(lvl=0;lvl<7;lvl+=2){ var y0=-0.1+lvl*0.63,y1=-0.1+(lvl+1)*0.63; pts.push(new THREE.Vector3(xs[b],y0,zS),new THREE.Vector3(xs[b+1],y1,zS)); } }
+    var scaf=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:ORANGE,transparent:true,opacity:0.55}));
+    rig.add(scaf);
+
+    /* Crane */
+    var cm=new THREE.MeshStandardMaterial({color:ORANGE,metalness:0.6,roughness:0.35,emissive:ORANGE,emissiveIntensity:0.15});
+    var crane=new THREE.Group();
+    var mast=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,6.4,8),cm); mast.position.set(-2.9,3.1,-1.8); crane.add(mast);
+    var jibG=new THREE.Group(); jibG.position.set(-2.9,6.2,-1.8);
+    var jib=new THREE.Mesh(new THREE.BoxGeometry(4.4,0.09,0.09),cm); jib.position.x=1.9; jibG.add(jib);
+    var cj=new THREE.Mesh(new THREE.BoxGeometry(1.1,0.09,0.09),cm); cj.position.x=-0.8; jibG.add(cj);
+    crane.add(jibG); rig.add(crane);
+
+    /* Ground: grid + radar */
+    var grid=new THREE.GridHelper(18,18,0x2a2a30,0x151519); grid.position.y=-0.3; grid.material.transparent=true; grid.material.opacity=0.5; scene.add(grid);
+    var radar=new THREE.Group(); radar.position.y=-0.28; scene.add(radar);
+    var sweep=new THREE.Mesh(new THREE.CircleGeometry(4.2,48,0,Math.PI/2.6),new THREE.MeshBasicMaterial({color:ORANGE,transparent:true,opacity:0.2,side:THREE.DoubleSide,depthWrite:false}));
+    sweep.rotation.x=-Math.PI/2; radar.add(sweep);
+    [4.2,3.0,1.8].forEach(function(r,idx){
+      var ring=new THREE.Mesh(new THREE.RingGeometry(r-0.02,r,72),new THREE.MeshBasicMaterial({color:ORANGE,transparent:true,opacity:0.25-idx*0.05,side:THREE.DoubleSide}));
+      ring.rotation.x=-Math.PI/2; ring.position.y=-0.27; scene.add(ring);
+    });
+
+    /* Hazard beacons */
+    var beaconDefs=[
+      {x:1.6,y:2.9,z:1.4,c:0xef4444},{x:-1.3,y:1.2,z:1.0,c:0xf97316},{x:0.9,y:4.4,z:-0.6,c:0xf97316},
+      {x:-0.4,y:3.2,z:-1.3,c:0xeab308},{x:2.0,y:0.4,z:-0.8,c:0x22c55e},{x:-2.4,y:0.5,z:0.6,c:0x22c55e}
+    ];
+    var beacons=beaconDefs.map(function(bd,idx){
+      var g=new THREE.Group(); g.position.set(bd.x,bd.y,bd.z);
+      var core=new THREE.Mesh(new THREE.SphereGeometry(0.075,12,12),new THREE.MeshBasicMaterial({color:bd.c}));
+      var halo=new THREE.Mesh(new THREE.SphereGeometry(0.16,12,12),new THREE.MeshBasicMaterial({color:bd.c,transparent:true,opacity:0.3,depthWrite:false}));
+      g.add(core); g.add(halo); rig.add(g);
+      return {halo:halo,phase:idx*0.9};
+    });
+
+    /* Orbit rings + satellites */
+    var orbit1=new THREE.Mesh(new THREE.TorusGeometry(3.3,0.012,8,140),new THREE.MeshBasicMaterial({color:ORANGE_L,transparent:true,opacity:0.55}));
+    orbit1.position.y=2.7; orbit1.rotation.x=Math.PI/2.15; scene.add(orbit1);
+    var orbit2=new THREE.Mesh(new THREE.TorusGeometry(2.8,0.01,8,140),new THREE.MeshBasicMaterial({color:ORANGE,transparent:true,opacity:0.35}));
+    orbit2.position.y=2.7; orbit2.rotation.x=Math.PI/2.6; orbit2.rotation.y=0.6; scene.add(orbit2);
+    var sat1=new THREE.Mesh(new THREE.SphereGeometry(0.07,10,10),new THREE.MeshBasicMaterial({color:0xffffff})); scene.add(sat1);
+    var sat2=new THREE.Mesh(new THREE.SphereGeometry(0.055,10,10),new THREE.MeshBasicMaterial({color:ORANGE_L})); scene.add(sat2);
+
+    /* Rising embers */
+    var N=70, pos=new Float32Array(N*3);
+    for(var i=0;i<N;i++){ pos[i*3]=(Math.random()-0.5)*12; pos[i*3+1]=Math.random()*7; pos[i*3+2]=(Math.random()-0.5)*12; }
+    var pg=new THREE.BufferGeometry(); pg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    var embers=new THREE.Points(pg,new THREE.PointsMaterial({color:ORANGE_L,size:0.035,transparent:true,opacity:0.5})); scene.add(embers);
+
+    function resize(){
+      var w=wrap.clientWidth||600, h=wrap.clientHeight||300;
+      renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+    }
+    if('ResizeObserver' in window){ new ResizeObserver(resize).observe(wrap); } else { window.addEventListener('resize',resize); }
+    resize();
+
+    var mx=0,my=0;
+    var hero=wrap.parentElement;
+    hero.addEventListener('pointermove',function(e){
+      var r=hero.getBoundingClientRect();
+      mx=((e.clientX-r.left)/r.width-0.5); my=((e.clientY-r.top)/r.height-0.5);
+    });
+    hero.addEventListener('pointerleave',function(){ mx=0; my=0; });
+
+    var visible=true;
+    if('IntersectionObserver' in window){ new IntersectionObserver(function(en){ visible=en[0].isIntersecting; }).observe(hero); }
+
+    var time=0, camAng=0.75, cx=0, cy=0;
+    function animate(){
+      requestAnimationFrame(animate);
+      if(!visible || document.hidden) return;
+      time+=0.008;
+      camAng+=0.0018;
+      cx+=(mx-cx)*0.05; cy+=(my-cy)*0.05;
+      var a=Math.sin(camAng)*0.55+cx*0.9+0.6;
+      var rad=10.6;
+      camera.position.set(Math.sin(a)*rad,5.0-cy*1.6+Math.sin(time*0.6)*0.15,Math.cos(a)*rad);
+      camera.lookAt(0,2.5,0);
+
+      radar.rotation.y-=0.018;
+      jibG.rotation.y=Math.sin(time*0.5)*0.5;
+      rim.intensity=2.0+Math.sin(time*2)*0.4;
+      orbit1.rotation.z+=0.0025; orbit2.rotation.z-=0.0035;
+      sat1.position.set(Math.cos(time*1.4)*3.3,2.7+Math.sin(time*1.4)*Math.sin(Math.PI/2.15)*3.3*0.0+Math.sin(time*1.4)*0.0,Math.sin(time*1.4)*3.3*Math.sin(Math.PI/2.15));
+      sat1.position.y=2.7+Math.sin(time*1.4)*3.3*Math.cos(Math.PI/2.15);
+      sat2.position.set(Math.cos(-time*1.9)*2.8,2.7+Math.sin(-time*1.9)*0.8,Math.sin(-time*1.9)*2.8);
+
+      beacons.forEach(function(bc){
+        var s=1+0.55*Math.abs(Math.sin(time*2.2+bc.phase));
+        bc.halo.scale.set(s,s,s); bc.halo.material.opacity=0.38-0.22*Math.abs(Math.sin(time*2.2+bc.phase));
+      });
+
+      var arr=pg.attributes.position.array;
+      for(var k=0;k<N;k++){ arr[k*3+1]+=0.006; if(arr[k*3+1]>7) arr[k*3+1]=0; }
+      pg.attributes.position.needsUpdate=true;
+
+      renderer.render(scene,camera);
+    }
+    animate();
+  })();
+})();
+</script>
+</body>
+</html>

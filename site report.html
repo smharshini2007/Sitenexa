@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Reports | SITENEXA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg-0:#07090d;
+    --bg-1:#0b0f16;
+    --bg-2:#10151e;
+    --panel:#12171f;
+    --panel-2:#161c26;
+    --border:rgba(255,255,255,0.07);
+    --border-orange:rgba(255,138,42,0.35);
+    --orange:#ff8a2a;
+    --orange-2:#ff6a00;
+    --orange-soft:rgba(255,138,42,0.14);
+    --text-hi:#f5f6f8;
+    --text-mid:#aab0bc;
+    --text-low:#6c7280;
+    --green:#3ddc84;
+    --red:#ff5c5c;
+    --yellow:#ffc24b;
+    --blue:#8fb1ff;
+    --radius:16px;
+    --radius-sm:10px;
+    --shadow:0 10px 30px rgba(0,0,0,0.45);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    background:
+      radial-gradient(ellipse 900px 500px at 85% -10%, rgba(255,120,20,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at -10% 90%, rgba(255,90,0,0.06), transparent 60%),
+      linear-gradient(180deg,var(--bg-0),var(--bg-1) 40%, var(--bg-0));
+    color:var(--text-hi);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  a{color:inherit; text-decoration:none;}
+
+  .bg-scene{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+  .bg-grid{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,138,42,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,138,42,0.045) 1px, transparent 1px);
+    background-size:46px 46px;
+    mask-image:radial-gradient(ellipse 80% 70% at 60% 20%, black 20%, transparent 75%);
+  }
+  .bg-glow{
+    position:absolute; width:520px; height:520px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,122,26,0.10), transparent 70%);
+    top:-160px; right:-160px;
+    animation:floatGlow 10s ease-in-out infinite;
+  }
+  @keyframes floatGlow{
+    0%,100%{transform:translate(0,0);}
+    50%{transform:translate(-30px, 30px);}
+  }
+  .bg-beam{
+    position:absolute; width:1px; height:100%; top:0;
+    background:linear-gradient(180deg, transparent, rgba(255,138,42,0.25), transparent);
+    animation:beamMove 8s ease-in-out infinite;
+  }
+  @keyframes beamMove{
+    0%,100%{opacity:0.15; transform:translateY(0);}
+    50%{opacity:0.5; transform:translateY(20px);}
+  }
+
+  .app{position:relative; z-index:1; display:grid; grid-template-columns:250px 1fr; min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{
+    background:linear-gradient(180deg, var(--bg-2), var(--bg-0));
+    border-right:1px solid var(--border);
+    padding:24px 16px; display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh;
+  }
+  .brand{display:flex; align-items:center; gap:12px; padding:4px 8px 26px 8px;}
+  .brand-icon{
+    width:38px; height:38px; border-radius:10px;
+    background:linear-gradient(135deg, var(--orange), var(--orange-2));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 18px rgba(255,122,26,0.5); font-size:18px;
+  }
+  .brand-name{font-size:17px; font-weight:700; letter-spacing:0.3px;}
+  .nav-label{font-size:11px; letter-spacing:1.2px; color:var(--text-low); margin:14px 10px 8px;}
+  .nav-item{
+    display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:var(--radius-sm);
+    color:var(--text-mid); font-size:14px; font-weight:500; margin-bottom:4px; cursor:pointer;
+    transition:background .2s ease, color .2s ease, transform .15s ease; border:1px solid transparent;
+  }
+  .nav-item .ic{width:18px; text-align:center; opacity:0.9;}
+  .nav-item:hover{background:rgba(255,255,255,0.04); color:var(--text-hi); transform:translateX(2px);}
+  .nav-item.active{
+    background:linear-gradient(90deg, rgba(255,122,26,0.18), rgba(255,122,26,0.03));
+    color:var(--orange); border:1px solid var(--border-orange);
+    box-shadow:0 0 16px rgba(255,122,26,0.12) inset;
+  }
+  .sidebar-bottom{margin-top:auto; display:flex; flex-direction:column; gap:10px;}
+  .status-chip{
+    display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-mid);
+    padding:9px 12px; border-radius:var(--radius-sm); background:var(--panel); border:1px solid var(--border);
+  }
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green);}
+  .user-card{
+    display:flex; align-items:center; gap:10px; padding:10px; border-radius:var(--radius-sm);
+    background:var(--panel-2); border:1px solid var(--border);
+  }
+  .avatar{
+    width:34px; height:34px; border-radius:9px;
+    background:linear-gradient(135deg, var(--orange), var(--orange-2));
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;
+  }
+  .user-name{font-size:13px; font-weight:600;}
+  .user-role{font-size:11px; color:var(--text-low);}
+
+  /* MAIN */
+  .main{padding:26px 34px 60px; min-width:0;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:26px; flex-wrap:wrap;}
+  .page-title{font-size:26px; font-weight:700; letter-spacing:0.2px;}
+  .page-sub{color:var(--text-mid); font-size:13.5px; margin-top:6px; max-width:560px;}
+  .top-actions{display:flex; align-items:center; gap:12px;}
+  .search-box{
+    display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:9px 14px; width:230px; color:var(--text-low); font-size:13px;
+  }
+  .icon-btn{
+    width:38px; height:38px; border-radius:10px; background:var(--panel); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;
+  }
+  .icon-btn .ping{
+    position:absolute; top:6px; right:7px; width:6px; height:6px; border-radius:50%;
+    background:var(--orange); box-shadow:0 0 6px var(--orange);
+  }
+  .pill-online{
+    display:flex; align-items:center; gap:7px; background:rgba(61,220,132,0.12); border:1px solid rgba(61,220,132,0.35);
+    color:var(--green); font-size:12.5px; font-weight:600; padding:8px 14px; border-radius:20px;
+  }
+
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.01));
+    border:1px solid var(--border); border-radius:var(--radius); backdrop-filter:blur(14px);
+    box-shadow:var(--shadow); position:relative; transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .card:hover{
+    border-color:var(--border-orange); box-shadow:0 12px 34px rgba(0,0,0,0.5), 0 0 22px rgba(255,122,26,0.08);
+    transform:translateY(-2px);
+  }
+
+  .summary-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:26px;}
+  .stat-card{padding:20px;}
+  .stat-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
+  .stat-icon{
+    width:42px; height:42px; border-radius:11px; background:var(--orange-soft); border:1px solid var(--border-orange);
+    display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 0 16px rgba(255,122,26,0.12) inset;
+  }
+  .badge{font-size:11.5px; font-weight:700; padding:4px 9px; border-radius:20px;}
+  .badge.up{background:rgba(61,220,132,0.14); color:var(--green);}
+  .badge.down{background:rgba(255,92,92,0.14); color:var(--red);}
+  .badge.flat{background:rgba(255,255,255,0.08); color:var(--text-mid);}
+  .stat-value{font-size:27px; font-weight:800; letter-spacing:0.2px;}
+  .stat-label{font-size:12.5px; color:var(--text-mid); margin-top:4px;}
+
+  .toolbar{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px;}
+  .toolbar .search-box{flex:1; min-width:220px;}
+  select, input[type=date]{
+    background:var(--panel); border:1px solid var(--border); color:var(--text-mid);
+    padding:9px 14px; border-radius:10px; font-size:13px; cursor:pointer;
+  }
+  .btn{
+    display:flex; align-items:center; gap:7px; padding:9px 16px; border-radius:10px; font-size:13px; font-weight:600;
+    cursor:pointer; border:1px solid var(--border); background:var(--panel); color:var(--text-hi);
+    transition:all .2s ease; white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--border-orange); background:var(--panel-2);}
+  .btn.primary{
+    background:linear-gradient(135deg, var(--orange), var(--orange-2)); border:none; color:#1a0b00;
+    box-shadow:0 6px 20px rgba(255,122,26,0.3);
+  }
+  .btn.primary:hover{filter:brightness(1.08); transform:translateY(-1px);}
+  .btn.ghost{background:transparent;}
+  .btn.danger{color:var(--red); border-color:rgba(255,92,92,0.3);}
+  .btn.success{color:var(--green); border-color:rgba(61,220,132,0.3);}
+
+  .section-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px;}
+  .section-title{font-size:17px; font-weight:700;}
+  .section-sub{font-size:12.5px; color:var(--text-mid); margin-top:2px;}
+
+  /* Daily report cards */
+  .report-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:30px;}
+  .report-card{padding:18px;}
+  .report-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;}
+  .report-proj{font-weight:700; font-size:14.5px;}
+  .report-id{font-size:11px; color:var(--text-low); margin-top:2px;}
+  .report-row{display:flex; justify-content:space-between; font-size:12px; color:var(--text-mid); margin-bottom:7px;}
+  .report-row b{color:var(--text-hi); font-weight:600;}
+  .progress-wrap{margin-top:10px;}
+  .progress-label{display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-mid); margin-bottom:5px;}
+  .progress-bar-bg{height:7px; border-radius:6px; background:rgba(255,255,255,0.07); overflow:hidden;}
+  .progress-bar{height:100%; border-radius:6px; background:linear-gradient(90deg,var(--orange),var(--orange-2));}
+
+  /* Table */
+  .table-card{padding:22px; margin-bottom:30px; overflow:auto;}
+  table{width:100%; border-collapse:collapse; min-width:920px;}
+  thead th{
+    text-align:left; font-size:11.5px; color:var(--text-low); letter-spacing:0.4px;
+    padding:0 14px 12px; font-weight:600; border-bottom:1px solid var(--border);
+  }
+  tbody td{padding:14px; font-size:13.5px; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:middle;}
+  tbody tr{transition:background .15s ease;}
+  tbody tr:hover{background:rgba(255,138,42,0.05);}
+  .rep-id{color:var(--text-low); font-size:12px;}
+  .status-chip2{
+    font-size:11.5px; font-weight:700; padding:5px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;
+  }
+  .status-chip2::before{content:''; width:6px; height:6px; border-radius:50%;}
+  .st-draft{background:rgba(255,255,255,0.08); color:var(--text-mid);}
+  .st-draft::before{background:var(--text-mid);}
+  .st-submitted{background:rgba(120,160,255,0.14); color:var(--blue);}
+  .st-submitted::before{background:var(--blue);}
+  .st-review{background:rgba(255,194,75,0.14); color:var(--yellow);}
+  .st-review::before{background:var(--yellow);}
+  .st-approved{background:rgba(61,220,132,0.14); color:var(--green);}
+  .st-approved::before{background:var(--green);}
+  .st-action{background:rgba(255,92,92,0.14); color:var(--red);}
+  .st-action::before{background:var(--red);}
+  .link-btn{color:var(--orange); font-weight:600; font-size:12.5px; cursor:pointer;}
+
+  /* Timeline */
+  .timeline-card{padding:26px; margin-bottom:30px;}
+  .timeline{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; position:relative;}
+  .tl-step{display:flex; flex-direction:column; align-items:center; gap:10px; flex:1; min-width:120px; position:relative;}
+  .tl-dot{
+    width:44px; height:44px; border-radius:50%; background:var(--orange-soft); border:1px solid var(--border-orange);
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+    box-shadow:0 0 16px rgba(255,122,26,0.15);
+    animation:pulseDot 3s ease-in-out infinite;
+  }
+  .tl-step:nth-child(2) .tl-dot{animation-delay:0.3s;}
+  .tl-step:nth-child(3) .tl-dot{animation-delay:0.6s;}
+  .tl-step:nth-child(4) .tl-dot{animation-delay:0.9s;}
+  .tl-step:nth-child(5) .tl-dot{animation-delay:1.2s;}
+  .tl-step:nth-child(6) .tl-dot{animation-delay:1.5s;}
+  @keyframes pulseDot{
+    0%,100%{box-shadow:0 0 12px rgba(255,122,26,0.12);}
+    50%{box-shadow:0 0 22px rgba(255,122,26,0.35);}
+  }
+  .tl-label{font-size:12.5px; font-weight:600; text-align:center; color:var(--text-hi);}
+  .tl-line{
+    position:absolute; top:22px; left:50%; width:100%; height:1px;
+    background:linear-gradient(90deg, var(--border-orange), var(--border));
+    z-index:-1;
+  }
+  .tl-step:last-child .tl-line{display:none;}
+
+  /* Activity list */
+  .activity-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:30px;}
+  .activity-card{padding:22px;}
+  .activity-item{display:flex; gap:12px; align-items:flex-start; padding:11px 0; border-bottom:1px solid rgba(255,255,255,0.05);}
+  .activity-item:last-child{border-bottom:none;}
+  .activity-ic{
+    width:32px; height:32px; border-radius:9px; background:var(--orange-soft); border:1px solid var(--border-orange);
+    display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;
+  }
+  .activity-text{font-size:13px; color:var(--text-mid);}
+  .activity-text b{color:var(--text-hi); font-weight:600;}
+  .activity-time{font-size:11px; color:var(--text-low); margin-top:2px;}
+
+  /* Issues table */
+  .priority-chip{font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px;}
+  .pr-low{background:rgba(61,220,132,0.14); color:var(--green);}
+  .pr-medium{background:rgba(255,194,75,0.14); color:var(--yellow);}
+  .pr-high{background:rgba(255,150,60,0.14); color:var(--orange);}
+  .pr-critical{background:rgba(255,92,92,0.14); color:var(--red);}
+
+  /* Analytics */
+  .analytics-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:16px; margin-bottom:30px;}
+  .chart-card{padding:20px; height:300px; display:flex; flex-direction:column;}
+  .chart-card canvas{flex:1; max-height:220px;}
+
+  /* AI insights */
+  .insights-card{padding:22px; position:relative; overflow:hidden; margin-bottom:30px;}
+  .insights-card::before{
+    content:''; position:absolute; top:-40px; right:-40px; width:180px; height:180px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,122,26,0.18), transparent 70%);
+  }
+  .ai-badge{
+    display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-weight:700;
+    color:var(--orange); background:var(--orange-soft); border:1px solid var(--border-orange);
+    padding:5px 12px; border-radius:20px; margin-bottom:14px;
+  }
+  .insight-item{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);}
+  .insight-item:last-child{border-bottom:none;}
+  .insight-dot{min-width:8px; height:8px; border-radius:50%; margin-top:6px; background:var(--orange); box-shadow:0 0 8px var(--orange);}
+  .insight-text{font-size:13.5px; color:var(--text-mid); line-height:1.5;}
+  .insight-text b{color:var(--text-hi);}
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(4,5,8,0.72); backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    width:560px; max-width:100%; max-height:88vh; overflow:auto;
+    background:linear-gradient(180deg, var(--panel-2), var(--bg-1));
+    border:1px solid var(--border-orange); border-radius:var(--radius);
+    padding:26px; box-shadow:0 20px 60px rgba(0,0,0,0.6), 0 0 30px rgba(255,122,26,0.1);
+    animation:modalIn .25s ease;
+  }
+  @keyframes modalIn{from{opacity:0; transform:translateY(14px) scale(0.98);} to{opacity:1; transform:none;}}
+  .modal-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px;}
+  .modal-title{font-size:18px; font-weight:700;}
+  .modal-close{cursor:pointer; color:var(--text-low); font-size:20px; line-height:1;}
+  .modal-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px;}
+  .m-field{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:11px 13px;}
+  .m-field.full{grid-column:1/-1;}
+  .m-label{font-size:11px; color:var(--text-low); margin-bottom:4px;}
+  .m-value{font-size:13.5px; font-weight:600; line-height:1.4;}
+  .modal-actions{display:flex; gap:10px; flex-wrap:wrap;}
+
+  ::-webkit-scrollbar{width:8px; height:8px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,138,42,0.3); border-radius:8px;}
+
+  @media(max-width:1200px){
+    .summary-grid{grid-template-columns:repeat(3,1fr);}
+    .report-grid{grid-template-columns:repeat(2,1fr);}
+    .analytics-grid{grid-template-columns:1fr;}
+    .activity-grid{grid-template-columns:1fr;}
+  }
+  @media(max-width:900px){
+    .app{grid-template-columns:1fr;}
+    .sidebar{display:none;}
+    .summary-grid{grid-template-columns:repeat(2,1fr);}
+    .report-grid{grid-template-columns:1fr;}
+    .timeline{flex-direction:column; align-items:flex-start;}
+    .tl-line{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-scene">
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">🏠</div>
+      <div class="brand-name">SITENEXA</div>
+    </div>
+
+    <div class="nav-label">MAIN</div>
+    <a class="nav-item" href="Dashboard.html"><span class="ic">▦</span> Dashboard</a>
+    <a class="nav-item" href="project page.html"><span class="ic">▢</span> Projects</a>
+    <a class="nav-item" href="workforce.html"><span class="ic">◎</span> Workforce</a>
+    <a class="nav-item" href="materials.html"><span class="ic">◈</span> Materials</a>
+    <a class="nav-item active" href="site-reports.html"><span class="ic">▤</span> Site Reports</a>
+    <a class="nav-item" href="analytics.html"><span class="ic">▥</span> Analytics</a>
+    <a class="nav-item" href="documents.html"><span class="ic">▧</span> Documents</a>
+
+    <div class="nav-label">SYSTEM</div>
+    <a class="nav-item" href="notifications.html"><span class="ic">🔔</span> Notifications</a>
+    <a class="nav-item" href="settings.html"><span class="ic">⚙</span> Settings</a>
+
+    <div class="sidebar-bottom">
+      <div class="status-chip"><span class="dot"></span> All Systems Operational</div>
+      <div class="user-card">
+        <div class="avatar">AK</div>
+        <div>
+          <div class="user-name">Arjun Kumar</div>
+          <div class="user-role">Site Engineer</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Site Reports</div>
+        <div class="page-sub">Track daily site activities, progress updates, inspections and construction issues.</div>
+      </div>
+      <div class="top-actions">
+        <div class="search-box">🔍 Search sites, reports...</div>
+        <div class="icon-btn">📅</div>
+        <div class="icon-btn">🔔<span class="ping"></span></div>
+        <div class="pill-online"><span class="dot"></span> Operations Online</div>
+        <div class="avatar">AK</div>
+      </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-grid">
+      <div class="card stat-card">
+        <div class="stat-top"><div class="stat-icon">📋</div><span class="badge up">▲ 5</span></div>
+        <div class="stat-value">34</div>
+        <div class="stat-label">Total Reports</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><div class="stat-icon">🗓️</div><span class="badge flat">This Week</span></div>
+        <div class="stat-value">12</div>
+        <div class="stat-label">Reports This Week</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><div class="stat-icon">⏳</div><span class="badge down">▼ Pending</span></div>
+        <div class="stat-value">6</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><div class="stat-icon">✅</div><span class="badge up">▲ 3</span></div>
+        <div class="stat-value">22</div>
+        <div class="stat-label">Approved Reports</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-top"><div class="stat-icon">⚠️</div><span class="badge down">▼ Watch</span></div>
+        <div class="stat-value">8</div>
+        <div class="stat-label">Site Issues</div>
+      </div>
+    </div>
+
+    <!-- DAILY SITE REPORT CARDS -->
+    <div class="section-head">
+      <div>
+        <div class="section-title">Daily Site Reports</div>
+        <div class="section-sub">Latest field reports submitted from active sites</div>
+      </div>
+    </div>
+    <div class="report-grid" id="reportCardGrid"></div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-box" style="flex:1;">🔍 <input id="searchInput" placeholder="Search report ID or project" style="background:transparent; border:none; outline:none; color:var(--text-hi); width:100%; font-size:13px;"></div>
+      <select id="projectFilter"><option value="">All Projects</option></select>
+      <input type="date" id="dateFilter">
+      <select id="statusFilter">
+        <option value="">All Status</option>
+        <option>Draft</option>
+        <option>Submitted</option>
+        <option>Under Review</option>
+        <option>Approved</option>
+        <option>Requires Action</option>
+      </select>
+      <button class="btn primary">＋ Create Report</button>
+      <button class="btn ghost">⬇ Export Report</button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card table-card">
+      <div class="section-head">
+        <div>
+          <div class="section-title">All Reports</div>
+          <div class="section-sub" id="tableCount">Showing reports</div>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Report ID</th><th>Project</th><th>Date</th><th>Engineer</th>
+            <th>Progress</th><th>Workforce</th><th>Issues</th><th>Status</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="reportTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="card timeline-card">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Daily Progress Timeline</div>
+          <div class="section-sub">Typical site workflow from morning to end-of-day reporting</div>
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="tl-step"><div class="tl-dot">🌅</div><div class="tl-label">Morning</div><div class="tl-line"></div></div>
+        <div class="tl-step"><div class="tl-dot">🏗️</div><div class="tl-label">Work Started</div><div class="tl-line"></div></div>
+        <div class="tl-step"><div class="tl-dot">🚚</div><div class="tl-label">Material Delivery</div><div class="tl-line"></div></div>
+        <div class="tl-step"><div class="tl-dot">🧱</div><div class="tl-label">Construction Activity</div><div class="tl-line"></div></div>
+        <div class="tl-step"><div class="tl-dot">🦺</div><div class="tl-label">Safety Inspection</div><div class="tl-line"></div></div>
+        <div class="tl-step"><div class="tl-dot">📝</div><div class="tl-label">End-of-Day Report</div></div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY + ISSUES -->
+    <div class="activity-grid">
+      <div class="card activity-card">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Site Activity</div>
+            <div class="section-sub">Recent activity logged across projects</div>
+          </div>
+        </div>
+        <div id="activityList"></div>
+      </div>
+
+      <div class="card activity-card">
+        <div class="section-head">
+          <div>
+            <div class="section-title">Site Issues</div>
+            <div class="section-sub">Open issues requiring attention</div>
+          </div>
+        </div>
+        <div style="overflow:auto;">
+          <table style="min-width:520px;">
+            <thead>
+              <tr><th>Issue</th><th>Project</th><th>Priority</th><th>Status</th></tr>
+            </thead>
+            <tbody id="issuesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="section-head">
+      <div>
+        <div class="section-title">Progress Analytics</div>
+        <div class="section-sub">Overall progress and weekly activity trends</div>
+      </div>
+    </div>
+    <div class="analytics-grid">
+      <div class="card chart-card">
+        <div class="section-sub" style="margin-bottom:8px;">Weekly Site Activity</div>
+        <canvas id="activityChart"></canvas>
+      </div>
+      <div class="card chart-card">
+        <div class="section-sub" style="margin-bottom:8px;">Overall Project Progress</div>
+        <canvas id="progressChart"></canvas>
+      </div>
+    </div>
+
+    <!-- AI INSIGHTS -->
+    <div class="card insights-card">
+      <span class="ai-badge">✨ AI Site Report Insights</span>
+      <div class="insight-item"><div class="insight-dot"></div><div class="insight-text">Daily progress is currently <b>aligned with the project schedule</b> across active sites.</div></div>
+      <div class="insight-item"><div class="insight-dot"></div><div class="insight-text"><b>Workforce productivity</b> increased this week compared to the previous reporting period.</div></div>
+      <div class="insight-item"><div class="insight-dot"></div><div class="insight-text">One <b>site issue at Metro Tower</b> requires attention before tomorrow's work begins.</div></div>
+      <div class="insight-item"><div class="insight-dot"></div><div class="insight-text"><b>Material delivery delays</b> may affect upcoming concrete and electrical activities.</div></div>
+      <div class="insight-item"><div class="insight-dot"></div><div class="insight-text"><b>Safety observations</b> have improved compared with the previous report cycle.</div></div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="mProject">Project Name</div>
+        <div class="section-sub" id="mId">SNX-RPT-000</div>
+      </div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div class="modal-grid">
+      <div class="m-field"><div class="m-label">Date</div><div class="m-value" id="mDate">-</div></div>
+      <div class="m-field"><div class="m-label">Site Engineer</div><div class="m-value" id="mEngineer">-</div></div>
+      <div class="m-field"><div class="m-label">Weather Conditions</div><div class="m-value" id="mWeather">-</div></div>
+      <div class="m-field"><div class="m-label">Workforce Count</div><div class="m-value" id="mWorkforce">-</div></div>
+      <div class="m-field full"><div class="m-label">Work Completed Today</div><div class="m-value" id="mWork">-</div></div>
+      <div class="m-field"><div class="m-label">Materials Received</div><div class="m-value" id="mMaterials">-</div></div>
+      <div class="m-field"><div class="m-label">Equipment Used</div><div class="m-value" id="mEquipment">-</div></div>
+      <div class="m-field full"><div class="m-label">Safety Observations</div><div class="m-value" id="mSafety">-</div></div>
+      <div class="m-field full"><div class="m-label">Issues Found</div><div class="m-value" id="mIssues">-</div></div>
+      <div class="m-field full"><div class="m-label">Tomorrow's Plan</div><div class="m-value" id="mPlan">-</div></div>
+      <div class="m-field full"><div class="m-label">Overall Progress</div><div class="m-value" id="mProgress">-</div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn success">✔ Approve Report</button>
+      <button class="btn danger">✎ Request Changes</button>
+      <button class="btn ghost">⬇ Download Report</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const reports = [
+  {id:'SNX-RPT-101', project:'Metro Tower', date:'27 Sep 2026', engineer:'Rajesh Kumar', weather:'Partly Cloudy, 29°C', workforce:64, workDone:'Concrete pouring completed for 4th floor slab.', materials:'320 Bags Cement, 14 Tons Sand', equipment:'Tower Crane, Concrete Mixer', safety:'No incidents reported. All workers wore PPE.', issues:'Minor delay due to material queue at gate.', plan:'Begin column reinforcement for 5th floor.', progress:78, status:'Approved'},
+  {id:'SNX-RPT-102', project:'Green Heights', date:'27 Sep 2026', engineer:'Priya Natarajan', weather:'Clear, 31°C', workforce:42, workDone:'Steel reinforcement installed for retaining wall.', materials:'8 Tons TMT Steel', equipment:'Bar Bending Machine, Welding Unit', safety:'Safety inspection completed, no violations.', issues:'None reported.', plan:'Start shuttering for retaining wall.', progress:64, status:'Under Review'},
+  {id:'SNX-RPT-103', project:'Skyline Mall', date:'26 Sep 2026', engineer:'Karthik Iyer', weather:'Light Rain, 26°C', workforce:38, workDone:'Electrical conduit installation started on ground floor.', materials:'1,200m Electrical Cable', equipment:'Cable Puller, Drill Sets', safety:'Wet floor caution signs placed near entrance.', issues:'Rain delayed outdoor scaffolding work by 2 hours.', plan:'Continue electrical rough-in for 1st floor.', progress:52, status:'Submitted'},
+  {id:'SNX-RPT-104', project:'Industrial Park', date:'26 Sep 2026', engineer:'Sneha Reddy', weather:'Sunny, 33°C', workforce:56, workDone:'Foundation work completed for Block C.', materials:'18 Tons Aggregates, 10 Tons Cement', equipment:'Excavator, Vibratory Roller', safety:'Toolbox talk conducted before shift start.', issues:'One equipment breakdown, resolved same day.', plan:'Begin plinth beam casting for Block C.', progress:45, status:'Approved'},
+  {id:'SNX-RPT-105', project:'Metro Tower', date:'25 Sep 2026', engineer:'Rajesh Kumar', weather:'Cloudy, 28°C', workforce:60, workDone:'Material delivery received and inventoried.', materials:'400 Bags Cement, 12 Tons Steel', equipment:'Forklift, Tower Crane', safety:'No incidents. Fire extinguishers checked.', issues:'Two materials flagged as low stock.', plan:'Resume slab work for 4th floor.', progress:75, status:'Requires Action'},
+  {id:'SNX-RPT-106', project:'Green Heights', date:'25 Sep 2026', engineer:'Priya Natarajan', weather:'Clear, 30°C', workforce:40, workDone:'Site cleared and leveled for new block.', materials:'None received today', equipment:'Bulldozer, Compactor', safety:'Site briefing conducted for new workers.', issues:'None reported.', plan:'Mark layout for foundation excavation.', progress:60, status:'Draft'},
+  {id:'SNX-RPT-107', project:'Skyline Mall', date:'24 Sep 2026', engineer:'Karthik Iyer', weather:'Sunny, 32°C', workforce:35, workDone:'Tiling work completed for basement parking.', materials:'2,100 Sq.ft Vitrified Tiles', equipment:'Tile Cutter, Mixer', safety:'PPE compliance at 100% during inspection.', issues:'None reported.', plan:'Begin tiling for ground floor lobby.', progress:50, status:'Approved'},
+  {id:'SNX-RPT-108', project:'Industrial Park', date:'24 Sep 2026', engineer:'Sneha Reddy', weather:'Partly Cloudy, 29°C', workforce:52, workDone:'Safety inspection completed across all blocks.', materials:'None received today', equipment:'N/A', safety:'Two minor observations logged and corrected.', issues:'Scaffolding at Block B needs reinforcement.', plan:'Reinforce scaffolding before resuming height work.', progress:44, status:'Under Review'},
+];
+
+const activities = [
+  {icon:'🧱', text:'Foundation work completed at Industrial Park Block C.', time:'Today, 09:12 AM'},
+  {icon:'🏗️', text:'Concrete pouring completed for Metro Tower 4th floor slab.', time:'Today, 11:40 AM'},
+  {icon:'🔩', text:'Steel reinforcement installed at Green Heights retaining wall.', time:'Yesterday, 03:20 PM'},
+  {icon:'⚡', text:'Electrical installation started at Skyline Mall ground floor.', time:'Yesterday, 10:05 AM'},
+  {icon:'🦺', text:'Safety inspection completed across all Industrial Park blocks.', time:'2 days ago, 08:50 AM'},
+  {icon:'🚚', text:'Material delivery received at Metro Tower — cement and steel.', time:'2 days ago, 02:15 PM'},
+];
+
+const issues = [
+  {issue:'Scaffolding needs reinforcement', project:'Industrial Park', priority:'High', reportedBy:'Sneha Reddy', date:'24 Sep', status:'In Progress'},
+  {issue:'Material queue delay at site gate', project:'Metro Tower', priority:'Medium', reportedBy:'Rajesh Kumar', date:'27 Sep', status:'Reported'},
+  {issue:'Low stock: Cement & Aggregates', project:'Metro Tower', priority:'Critical', reportedBy:'Rajesh Kumar', date:'27 Sep', status:'Assigned'},
+  {issue:'Rain delayed scaffolding work', project:'Skyline Mall', priority:'Low', reportedBy:'Karthik Iyer', date:'26 Sep', status:'Resolved'},
+  {issue:'Equipment breakdown - excavator', project:'Industrial Park', priority:'Medium', reportedBy:'Sneha Reddy', date:'26 Sep', status:'Verified'},
+];
+
+const statusClass = {'Draft':'st-draft','Submitted':'st-submitted','Under Review':'st-review','Approved':'st-approved','Requires Action':'st-action'};
+const priorityClass = {'Low':'pr-low','Medium':'pr-medium','High':'pr-high','Critical':'pr-critical'};
+
+function populateFilters(){
+  const projs = [...new Set(reports.map(r=>r.project))];
+  const projSel = document.getElementById('projectFilter');
+  projs.forEach(p=>{ const o=document.createElement('option'); o.textContent=p; projSel.appendChild(o); });
+}
+
+function renderReportCards(){
+  const grid = document.getElementById('reportCardGrid');
+  const latest = reports.slice(0,4);
+  grid.innerHTML = latest.map(r=>`
+    <div class="card report-card" onclick='openModal("${r.id}")' style="cursor:pointer;">
+      <div class="report-top">
+        <div>
+          <div class="report-proj">${r.project}</div>
+          <div class="report-id">${r.id} • ${r.date}</div>
+        </div>
+        <span class="status-chip2 ${statusClass[r.status]}">${r.status}</span>
+      </div>
+      <div class="report-row"><span>Engineer</span><b>${r.engineer}</b></div>
+      <div class="report-row"><span>Weather</span><b>${r.weather}</b></div>
+      <div class="report-row"><span>Workforce</span><b>${r.workforce} On Site</b></div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Progress</span><span>${r.progress}%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar" style="width:${r.progress}%;"></div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTable(){
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const proj = document.getElementById('projectFilter').value;
+  const date = document.getElementById('dateFilter').value;
+  const status = document.getElementById('statusFilter').value;
+
+  const filtered = reports.filter(r=>{
+    const matchSearch = r.project.toLowerCase().includes(search) || r.id.toLowerCase().includes(search);
+    const matchProj = !proj || r.project === proj;
+    const matchStatus = !status || r.status === status;
+    return matchSearch && matchProj && matchStatus;
+  });
+
+  document.getElementById('tableCount').textContent = `Showing ${filtered.length} of ${reports.length} reports`;
+
+  document.getElementById('reportTableBody').innerHTML = filtered.map(r=>{
+    const issueCount = r.issues && r.issues !== 'None reported.' ? 1 : 0;
+    return `
+    <tr>
+      <td class="rep-id">${r.id}</td>
+      <td>${r.project}</td>
+      <td>${r.date}</td>
+      <td>${r.engineer}</td>
+      <td>${r.progress}%</td>
+      <td>${r.workforce}</td>
+      <td>${issueCount}</td>
+      <td><span class="status-chip2 ${statusClass[r.status]}">${r.status}</span></td>
+      <td><span class="link-btn" onclick='openModal("${r.id}")'>View →</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderActivities(){
+  document.getElementById('activityList').innerHTML = activities.map(a=>`
+    <div class="activity-item">
+      <div class="activity-ic">${a.icon}</div>
+      <div>
+        <div class="activity-text">${a.text}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderIssues(){
+  document.getElementById('issuesTableBody').innerHTML = issues.map(i=>`
+    <tr>
+      <td>${i.issue}</td>
+      <td>${i.project}</td>
+      <td><span class="priority-chip ${priorityClass[i.priority]}">${i.priority}</span></td>
+      <td style="font-size:12.5px; color:var(--text-mid);">${i.status}</td>
+    </tr>
+  `).join('');
+}
+
+function openModal(id){
+  const r = reports.find(x=>x.id===id);
+  if(!r) return;
+  document.getElementById('mProject').textContent = r.project;
+  document.getElementById('mId').textContent = r.id;
+  document.getElementById('mDate').textContent = r.date;
+  document.getElementById('mEngineer').textContent = r.engineer;
+  document.getElementById('mWeather').textContent = r.weather;
+  document.getElementById('mWorkforce').textContent = `${r.workforce} Workers`;
+  document.getElementById('mWork').textContent = r.workDone;
+  document.getElementById('mMaterials').textContent = r.materials;
+  document.getElementById('mEquipment').textContent = r.equipment;
+  document.getElementById('mSafety').textContent = r.safety;
+  document.getElementById('mIssues').textContent = r.issues;
+  document.getElementById('mPlan').textContent = r.plan;
+  document.getElementById('mProgress').textContent = `${r.progress}% Complete`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+document.getElementById('modalOverlay').addEventListener('click', e=>{
+  if(e.target.id==='modalOverlay') closeModal();
+});
+
+['searchInput','projectFilter','dateFilter','statusFilter'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderTable);
+  document.getElementById(id).addEventListener('change', renderTable);
+});
+
+populateFilters();
+renderReportCards();
+renderTable();
+renderActivities();
+renderIssues();
+
+// CHARTS
+Chart.defaults.color = '#aab0bc';
+Chart.defaults.font.family = "Segoe UI, sans-serif";
+const orange = '#ff8a2a';
+const gridColor = 'rgba(255,255,255,0.06)';
+
+new Chart(document.getElementById('activityChart'), {
+  type:'bar',
+  data:{
+    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets:[{
+      label:'Reports Filed',
+      data:[4,6,5,7,6,3,2],
+      backgroundColor:'#ff8a2a',
+      borderRadius:6
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{ x:{grid:{display:false}}, y:{grid:{color:gridColor}} }
+  }
+});
+
+new Chart(document.getElementById('progressChart'), {
+  type:'doughnut',
+  data:{
+    labels:['Metro Tower','Green Heights','Skyline Mall','Industrial Park'],
+    datasets:[{
+      data:[78,64,52,45],
+      backgroundColor:['#ff8a2a','#ff6a00','#ffb066','#8fb1ff'],
+      borderWidth:0
+    }]
+  },
+  options:{
+    plugins:{legend:{position:'bottom', labels:{boxWidth:10, padding:12, font:{size:11}}}},
+    cutout:'62%'
+  }
+});
+</script>
+</body>
+</html>

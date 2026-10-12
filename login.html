@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Employee sign in · Plumbline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Plumbline auth — charcoal, safety orange, brass gold */
+:root{
+  --asphalt:#0f0d0c; --steel:#1a1714; --concrete:#e8e2d8; --muted:#a39a8d;
+  --orange:#ff6a1a; --orange-2:#ff8a3d; --gold:#d9a94a;
+  --line:rgba(255,255,255,.09); --danger:#ff7a6b; --ok:#8fd19e;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{min-height:100vh;min-height:100dvh;background:var(--asphalt);color:var(--concrete);font:400 15px/1.5 var(--body);
+  display:grid;grid-template-columns:minmax(0,1.15fr) minmax(420px,.85fr);overflow-x:hidden}
+a{color:var(--orange-2);text-decoration:none;transition:color .2s}
+a:hover{color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ---------- Left: cinematic stage ---------- */
+.stage{position:sticky;top:0;height:100vh;height:100dvh;overflow:hidden;background:#0c0b0a}
+.scene{position:absolute;inset:0;width:100%;height:100%}
+.shade{position:absolute;inset:0;background:
+  linear-gradient(90deg,rgba(15,13,12,0) 55%,var(--asphalt) 100%),
+  linear-gradient(0deg,rgba(15,13,12,.9) 0%,rgba(15,13,12,0) 45%),
+  radial-gradient(ellipse at 30% 30%,transparent 40%,rgba(0,0,0,.45) 100%)}
+.story{position:absolute;left:clamp(28px,5vw,72px);right:clamp(28px,6vw,90px);bottom:clamp(28px,6vh,72px);max-width:560px}
+.story h2{font:800 clamp(2.6rem,5vw,4.6rem)/.95 var(--display);letter-spacing:.005em;margin:26px 0 16px;text-wrap:balance}
+.story p{color:#cfc6b8;max-width:46ch}
+.stats{list-style:none;padding:0;margin-top:30px;display:flex;gap:34px;flex-wrap:wrap;border-top:1px solid rgba(217,169,74,.35);padding-top:18px}
+.stats li{color:var(--muted);font-size:.8rem}
+.stats b{display:block;font:800 1.9rem/1 var(--display);color:var(--concrete);letter-spacing:.02em}
+.brand{display:inline-flex;align-items:center;gap:11px;font:800 1.5rem/1 var(--display);letter-spacing:.06em;color:var(--concrete)}
+.brand:hover{color:var(--concrete)}
+.mark{width:22px;height:22px;position:relative;display:inline-block;border:2px solid var(--orange);border-radius:3px}
+.mark::after{content:"";position:absolute;left:50%;top:-5px;width:2px;height:22px;background:var(--gold);transform:translateX(-50%)}
+.mobile-brand{display:none}
+
+/* scene motion: one slow crane sweep, faint window flicker */
+.jib{animation:sweep 26s ease-in-out infinite alternate}
+@keyframes sweep{from{transform:scaleX(1)}to{transform:scaleX(.78)}}
+.win{animation:glow 7s ease-in-out infinite}
+.win.w1{animation-delay:-2s}.win.w2{animation-delay:-4.5s}
+@keyframes glow{0%,100%{opacity:.16}50%{opacity:.34}}
+
+/* ---------- Right: panel + glass card ---------- */
+.panel{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px clamp(18px,4vw,56px);
+  background:radial-gradient(700px 500px at 80% 0%,rgba(255,106,26,.09),transparent 70%),
+  var(--asphalt);position:relative}
+.panel::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,138,61,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,138,61,.05) 1px,transparent 1px);
+  background-size:36px 36px;mask-image:radial-gradient(circle at 60% 40%,#000 0%,transparent 75%);-webkit-mask-image:radial-gradient(circle at 60% 40%,#000 0%,transparent 75%)}
+.card{position:relative;width:100%;max-width:440px;padding:34px 32px 26px;border-radius:14px;
+  background:linear-gradient(160deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+  border:1px solid var(--line);backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.08);
+  animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
+.card::before{content:"";position:absolute;left:24px;right:24px;top:-1px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--orange),transparent);border-radius:2px}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+body.wide .card{max-width:600px}
+
+.card header{margin:6px 0 22px}
+.card h1{font:800 2.2rem/1 var(--display);letter-spacing:.02em}
+.card header p{color:var(--muted);margin-top:8px;font-size:.92rem}
+
+/* role switch */
+.roles{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:10px;background:rgba(0,0,0,.35);border:1px solid var(--line);margin-bottom:22px}
+.roles a{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 0;color:var(--muted);font-weight:500;border-radius:7px;transition:color .25s}
+.roles a.on{color:#160b04}
+.roles a:not(.on):hover{color:var(--concrete)}
+.roles .thumb{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:7px;background:linear-gradient(135deg,var(--orange-2),var(--orange));box-shadow:0 6px 18px -6px rgba(255,106,26,.7);transition:transform .35s cubic-bezier(.3,.8,.2,1)}
+.ico{width:18px;height:18px;flex:none}
+
+/* fields */
+.field{margin-bottom:16px;min-width:0}
+.field label{display:block;font-size:.82rem;font-weight:500;color:#cfc6b8;margin-bottom:7px}
+.control{position:relative;display:flex;align-items:center;border-radius:9px;background:rgba(0,0,0,.38);border:1px solid var(--line);color:var(--muted);transition:border-color .2s,box-shadow .2s,background .2s}
+.control:hover{border-color:rgba(255,255,255,.18)}
+.control:focus-within{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,106,26,.18);color:var(--orange-2);background:rgba(0,0,0,.5)}
+.control .ico{margin-left:13px}
+.control input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--concrete);font:inherit;padding:13px 12px}
+.control input::placeholder{color:#6f675c}
+.control input:-webkit-autofill{-webkit-text-fill-color:var(--concrete);box-shadow:0 0 0 40px #1c1815 inset}
+.reveal{background:none;border:0;color:inherit;padding:0 13px;height:100%;cursor:pointer;display:flex;align-items:center}
+.reveal:hover{color:var(--gold)}
+.field.bad .control{border-color:var(--danger);box-shadow:0 0 0 3px rgba(255,122,107,.14)}
+.err{color:var(--danger);font-size:.78rem;min-height:0;margin-top:5px}
+.err:empty{display:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:2px 0 20px;font-size:.84rem}
+.note{color:var(--muted);font-size:.78rem}
+
+/* password meter */
+.meter{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:-2px 0 22px}
+.meter i{height:3px;border-radius:2px;background:rgba(255,255,255,.1);transition:background .3s}
+.meter em{grid-column:1/-1;font-style:normal;font-size:.76rem;color:var(--muted)}
+.meter[data-s="1"] i:nth-child(-n+1){background:var(--danger)}
+.meter[data-s="2"] i:nth-child(-n+2){background:var(--orange)}
+.meter[data-s="3"] i:nth-child(-n+3){background:var(--gold)}
+.meter[data-s="4"] i:nth-child(-n+4){background:var(--ok)}
+
+/* primary button */
+.cta{position:relative;overflow:hidden;width:100%;padding:14px 18px;border:0;border-radius:9px;cursor:pointer;
+  font:600 1rem/1 var(--body);letter-spacing:.02em;color:#180c05;
+  background:linear-gradient(135deg,var(--orange-2),var(--orange) 60%,#e5540a);
+  box-shadow:0 12px 28px -10px rgba(255,106,26,.75),inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .2s,box-shadow .25s,filter .2s}
+.cta::after{content:"";position:absolute;top:0;bottom:0;width:60%;left:-80%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);transform:skewX(-20deg);transition:left .6s}
+.cta:hover{transform:translateY(-1px);box-shadow:0 16px 34px -10px rgba(255,106,26,.9),inset 0 1px 0 rgba(255,255,255,.4)}
+.cta:hover::after{left:130%}
+.cta:active{transform:translateY(1px)}
+.cta:disabled{cursor:progress;filter:saturate(.7) brightness(.9)}
+.spinner{display:none;position:absolute;right:16px;top:50%;width:16px;height:16px;margin-top:-8px;border:2px solid rgba(24,12,5,.3);border-top-color:#180c05;border-radius:50%;animation:spin .7s linear infinite}
+.cta.busy .spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.banner{padding:11px 14px;border-radius:9px;font-size:.87rem;margin-bottom:18px;border:1px solid}
+.banner.error{color:#ffc3ba;background:rgba(255,122,107,.1);border-color:rgba(255,122,107,.4)}
+.banner.ok{color:#c8f0d1;background:rgba(143,209,158,.1);border-color:rgba(143,209,158,.4)}
+.card-foot{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);text-align:center;font-size:.88rem;color:var(--muted)}
+.legal{margin-top:22px;font-size:.74rem;color:#6f675c;position:relative}
+
+/* ---------- Responsive ---------- */
+@media (max-width:980px){
+  body{display:block;position:relative}
+  .stage{position:fixed;inset:0;height:auto;z-index:0}
+  .shade{background:linear-gradient(180deg,rgba(15,13,12,.55),rgba(15,13,12,.88))}
+  .story{display:none}
+  .panel{position:relative;z-index:1;background:none;padding:28px 16px}
+  .panel::before{display:none}
+  .mobile-brand{display:inline-flex;margin-bottom:22px}
+}
+@media (max-width:560px){
+  .card{padding:26px 20px 20px}
+  .two{grid-template-columns:1fr}
+  .card h1{font-size:1.9rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+}
+.row-note{margin:2px 0 20px}
+
+.view.enter{animation:swap .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes swap{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+[hidden]{display:none!important}
+
+</style>
+</head>
+<body>
+<div class="stage">
+  <svg class="scene" viewBox="0 0 800 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c0b0a"/><stop offset=".55" stop-color="#1d1410"/><stop offset=".85" stop-color="#5a2a12"/><stop offset="1" stop-color="#b8531a"/></linearGradient>
+<radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffb060" stop-opacity=".95"/><stop offset=".25" stop-color="#ff7a25" stop-opacity=".55"/><stop offset="1" stop-color="#ff6a1a" stop-opacity="0"/></radialGradient>
+<linearGradient id="steel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2a2622"/><stop offset="1" stop-color="#171412"/></linearGradient>
+<pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#ff8a3d" stroke-opacity=".07" stroke-width="1"/></pattern>
+<pattern id="grid5" width="200" height="200" patternUnits="userSpaceOnUse"><path d="M200 0H0V200" fill="none" stroke="#d9a94a" stroke-opacity=".10" stroke-width="1"/></pattern>
+</defs>
+<rect width="800" height="900" fill="url(#sky)"/>
+<circle cx="520" cy="700" r="330" fill="url(#sun)"/>
+<circle cx="520" cy="712" r="46" fill="#ffc98a" opacity=".9"/><rect x="0" y="692" width="48" height="108" fill="#1a1411" opacity=".85"/><rect x="51" y="712" width="31" height="88" fill="#1a1411" opacity=".85"/><rect x="88" y="706" width="62" height="94" fill="#1a1411" opacity=".85"/><rect x="152" y="601" width="31" height="199" fill="#1a1411" opacity=".85"/><rect x="184" y="708" width="30" height="92" fill="#1a1411" opacity=".85"/><rect x="217" y="713" width="54" height="87" fill="#1a1411" opacity=".85"/><rect x="272" y="589" width="33" height="211" fill="#1a1411" opacity=".85"/><rect x="308" y="586" width="31" height="214" fill="#1a1411" opacity=".85"/><rect x="339" y="569" width="42" height="231" fill="#1a1411" opacity=".85"/><rect x="386" y="583" width="31" height="217" fill="#1a1411" opacity=".85"/><rect x="421" y="718" width="53" height="82" fill="#1a1411" opacity=".85"/><rect x="475" y="588" width="30" height="212" fill="#1a1411" opacity=".85"/><rect x="511" y="656" width="36" height="144" fill="#1a1411" opacity=".85"/><rect x="550" y="592" width="37" height="208" fill="#1a1411" opacity=".85"/><rect x="587" y="587" width="47" height="213" fill="#1a1411" opacity=".85"/><rect x="640" y="704" width="39" height="96" fill="#1a1411" opacity=".85"/><rect x="683" y="635" width="40" height="165" fill="#1a1411" opacity=".85"/><rect x="723" y="586" width="32" height="214" fill="#1a1411" opacity=".85"/><rect x="755" y="603" width="41" height="197" fill="#1a1411" opacity=".85"/><rect y="640" width="800" height="170" fill="#ff6a1a" opacity=".07"/><rect class="win w0" x="235.0" y="748" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect class="win w1" x="320.0" y="748" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect class="win w0" x="490.0" y="748" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect class="win w1" x="235.0" y="688" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect class="win w0" x="405.0" y="688" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect class="win w1" x="490.0" y="688" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect class="win w2" x="235.0" y="628" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect class="win w1" x="405.0" y="628" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect class="win w1" x="320.0" y="568" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect class="win w2" x="405.0" y="568" width="75.0" height="52" fill="#ffa24d" opacity=".22"/><rect x="226.0" y="260" width="8" height="540" fill="url(#steel)"/><rect x="311.0" y="260" width="8" height="540" fill="url(#steel)"/><rect x="396.0" y="260" width="8" height="540" fill="url(#steel)"/><rect x="481.0" y="260" width="8" height="540" fill="url(#steel)"/><rect x="566.0" y="260" width="8" height="540" fill="url(#steel)"/><rect x="216" y="736" width="368" height="8" fill="#2c2621"/><rect x="216" y="736" width="368" height="1.5" fill="#ff8a3d" opacity=".5"/><rect x="216" y="676" width="368" height="8" fill="#2c2621"/><rect x="216" y="676" width="368" height="1.5" fill="#ff8a3d" opacity=".5"/><rect x="216" y="616" width="368" height="8" fill="#2c2621"/><rect x="216" y="616" width="368" height="1.5" fill="#ff8a3d" opacity=".5"/><rect x="216" y="556" width="368" height="8" fill="#2c2621"/><rect x="216" y="556" width="368" height="1.5" fill="#ff8a3d" opacity=".5"/><rect x="216" y="496" width="368" height="8" fill="#2c2621"/><rect x="216" y="496" width="368" height="1.5" fill="#ff8a3d" opacity=".5"/><rect x="216" y="436" width="368" height="8" fill="#2c2621"/><rect x="216" y="436" width="368" height="1.5" fill="#ff8a3d" opacity=".5"/><rect x="216" y="376" width="368" height="8" fill="#2c2621"/><rect x="216" y="376" width="368" height="1.5" fill="#ff8a3d" opacity=".5"/><rect x="216" y="316" width="368" height="8" fill="#2c2621"/><rect x="216" y="316" width="368" height="1.5" fill="#ff8a3d" opacity=".5"/><rect x="216" y="256" width="368" height="8" fill="#2c2621"/><rect x="216" y="256" width="368" height="1.5" fill="#ff8a3d" opacity=".5"/><path d="M230.0 440 L315.0 380" stroke="#3a322b" stroke-width="2"/><path d="M400.0 440 L485.0 380" stroke="#3a322b" stroke-width="2"/><path d="M315.0 380 L400.0 320" stroke="#3a322b" stroke-width="2"/><path d="M485.0 380 L570.0 320" stroke="#3a322b" stroke-width="2"/><path d="M230.0 320 L315.0 260" stroke="#3a322b" stroke-width="2"/><path d="M400.0 320 L485.0 260" stroke="#3a322b" stroke-width="2"/><path d="M227.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M230.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M233.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M312.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M315.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M318.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M397.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M400.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M403.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M482.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M485.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M488.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M567.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M570.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><path d="M573.0 260 v-26" stroke="#ff8a3d" stroke-opacity=".7" stroke-width="1.2"/><g stroke="#d9a94a" stroke-opacity=".7" fill="none" stroke-width="1">
+<path d="M190 800 V260"/><path d="M182 800 h16 M182 260 h16"/>
+<path d="M182 500 h16 M182 620 h16 M182 380 h16"/></g>
+<g fill="#d9a94a" fill-opacity=".85" font-family="IBM Plex Sans, sans-serif" font-size="11">
+<text x="128" y="264">+ 54.00 m</text><text x="128" y="504">+ 30.00 m</text><text x="140" y="804">± 0.00</text></g><rect x="651" y="120" width="18" height="680" fill="none" stroke="#3a322b" stroke-width="1.5"/><polyline points="651,120 669,140 651,160 669,180 651,200 669,220 651,240 669,260 651,280 669,300 651,320 669,340 651,360 669,380 651,400 669,420 651,440 669,460 651,480 669,500 651,520 669,540 651,560 669,580 651,600 669,620 651,640 669,660 651,680 669,700 651,720 669,740 651,760 669,780" fill="none" stroke="#3f362e" stroke-width="1.2"/><rect x="636" y="784" width="48" height="16" fill="#241f1b"/><g class="jib" style="transform-origin:660px 120px">
+<rect x="651" y="96" width="18" height="26" fill="#ff6a1a"/>
+<rect x="654" y="86" width="12" height="12" fill="#ffb060" opacity=".85"/>
+<path d="M480 122 H669" stroke="#ff6a1a" stroke-width="5"/>
+<path d="M480 122 L550 96 L620 122 M550 96 L550 122" stroke="#ff6a1a" stroke-width="1.4" fill="none"/>
+<path d="M651 122 H780" stroke="#ff6a1a" stroke-width="5"/>
+<rect x="730" y="112" width="44" height="22" fill="#2a2420" stroke="#ff6a1a" stroke-width="1"/>
+<path d="M660 86 L490 120 M660 86 L770 120" stroke="#8a4a25" stroke-width="1"/>
+<line x1="510" y1="124" x2="510" y2="330" stroke="#8a7a6a" stroke-width="1"/>
+<path d="M498 330 h24 l-4 10 h-16z" fill="#ff8a3d"/>
+<rect x="494" y="340" width="32" height="14" fill="#2f2924" stroke="#d9a94a" stroke-width=".8"/>
+</g><rect y="800" width="800" height="100" fill="#0c0a09"/><rect y="800" width="800" height="2" fill="#ff8a3d" opacity=".55"/><path d="M0 830 v-22 M0 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M44 830 v-22 M44 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M88 830 v-22 M88 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M132 830 v-22 M132 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M176 830 v-22 M176 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M220 830 v-22 M220 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M264 830 v-22 M264 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M308 830 v-22 M308 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M352 830 v-22 M352 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M396 830 v-22 M396 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M440 830 v-22 M440 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M484 830 v-22 M484 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M528 830 v-22 M528 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M572 830 v-22 M572 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M616 830 v-22 M616 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M660 830 v-22 M660 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M704 830 v-22 M704 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M748 830 v-22 M748 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M792 830 v-22 M792 830 h44" stroke="#2a2420" stroke-width="2"/><path d="M836 830 v-22 M836 830 h44" stroke="#2a2420" stroke-width="2"/><rect width="800" height="900" fill="url(#grid)"/><rect width="800" height="900" fill="url(#grid5)"/></svg>
+  <div class="shade"></div>
+  <section class="story">
+    <a class="brand" href="#employee"><span class="mark"></span>Plumbline</a>
+    <h2>Run every site from one place.</h2>
+    <p>Crews, schedules, materials and budgets for every project you build, in a single ledger your whole team can trust.</p>
+    <ul class="stats"><li><b>42</b>active sites tracked</li><li><b>1,180</b>crew members on shift</li><li><b>99.9%</b>uptime on site</li></ul>
+  </section>
+</div>
+<main class="panel">
+  <div class="card">
+    <a class="brand mobile-brand" href="#employee"><span class="mark"></span>Plumbline</a>
+    <nav class="roles" aria-label="Sign in as">
+      <a href="#employee" data-tab="employee" class="on"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17h18M5 17a7 7 0 0 1 14 0M12 6v4M9 10V8.5M15 10V8.5"/></svg>Employee</a>
+      <a href="#owner" data-tab="owner"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V8l8-4 8 4v13M9 21v-6h6v6M8 11h.01M12 11h.01M16 11h.01"/></svg>Owner</a>
+      <span class="thumb"></span>
+    </nav>
+
+    <section class="view" data-view="employee">
+      <header><h1>Employee sign in</h1><p>Use the ID or email your company gave you.</p></header><div class="banner" role="status" aria-live="polite" hidden></div>
+      <form novalidate data-form="employeeLogin">
+        <div class="field"><label for="e-identifier">Employee ID or email</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 8c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg><input id="e-identifier" name="identifier" type="text" placeholder="EMP-1042 or you@company.com" autocomplete="username" required ></div>
+<p class="err" data-err-for="identifier"></p></div>
+        <div class="field"><label for="e-password">Password</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><input id="e-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required ><button type="button" class="reveal" aria-label="Show password" data-reveal><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+<p class="err" data-err-for="password"></p></div>
+        <p class="note row-note">Accounts are created by your company owner.</p>
+        <button class="cta" type="submit"><span class="cta-label">Sign in</span><span class="spinner" aria-hidden="true"></span></button>
+      </form>
+      <footer class="card-foot">Not an employee? <a href="#owner">Sign in as owner</a></footer>
+    </section>
+
+    <section class="view" data-view="owner" hidden>
+      <header><h1>Owner sign in</h1><p>Manage your company, sites and crews.</p></header><div class="banner" role="status" aria-live="polite" hidden></div>
+      <form novalidate data-form="ownerLogin">
+        <div class="field"><label for="o-email">Owner email</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><input id="o-email" name="email" type="email" placeholder="owner@company.com" autocomplete="email" required ></div>
+<p class="err" data-err-for="email"></p></div>
+        <div class="field"><label for="o-password">Password</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><input id="o-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required ><button type="button" class="reveal" aria-label="Show password" data-reveal><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+<p class="err" data-err-for="password"></p></div>
+        <div class="row-note"></div>
+        <button class="cta" type="submit"><span class="cta-label">Sign in</span><span class="spinner" aria-hidden="true"></span></button>
+      </form>
+      <footer class="card-foot">New company? <a href="#register">Create owner account</a></footer>
+    </section>
+
+    <section class="view" data-view="register" hidden>
+      <header><h1>Create owner account</h1><p>Set up your company. You can add employees after you sign in.</p></header><div class="banner" role="status" aria-live="polite" hidden></div>
+      <form novalidate data-form="ownerRegister">
+        <div class="two"><div class="field"><label for="r-fullName">Full name</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 8c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg><input id="r-fullName" name="fullName" type="text" placeholder="Your full name" autocomplete="name" required ></div>
+<p class="err" data-err-for="fullName"></p></div><div class="field"><label for="r-companyName">Company name</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V8l8-4 8 4v13M9 21v-6h6v6M8 11h.01M12 11h.01M16 11h.01"/></svg><input id="r-companyName" name="companyName" type="text" placeholder="Company or firm" autocomplete="organization" required ></div>
+<p class="err" data-err-for="companyName"></p></div></div>
+        <div class="two"><div class="field"><label for="r-email">Email</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><input id="r-email" name="email" type="email" placeholder="you@company.com" autocomplete="email" required ></div>
+<p class="err" data-err-for="email"></p></div><div class="field"><label for="r-phone">Phone number</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg><input id="r-phone" name="phone" type="tel" placeholder="+91 98765 43210" autocomplete="tel" required ></div>
+<p class="err" data-err-for="phone"></p></div></div>
+        <div class="two"><div class="field"><label for="r-password">Password</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><input id="r-password" name="password" type="password" placeholder="8+ characters" autocomplete="new-password" required data-strength><button type="button" class="reveal" aria-label="Show password" data-reveal><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+<p class="err" data-err-for="password"></p></div><div class="field"><label for="r-confirmPassword">Confirm password</label>
+<div class="control"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><input id="r-confirmPassword" name="confirmPassword" type="password" placeholder="Repeat it" autocomplete="new-password" required ><button type="button" class="reveal" aria-label="Show password" data-reveal><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+<p class="err" data-err-for="confirmPassword"></p></div></div>
+        <div class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><em id="meter-text">Use 8+ characters with letters and numbers.</em></div>
+        <button class="cta" type="submit"><span class="cta-label">Create account</span><span class="spinner" aria-hidden="true"></span></button>
+      </form>
+      <footer class="card-foot">Already registered? <a href="#owner">Sign in as owner</a></footer>
+    </section>
+  </div>
+  <p class="legal">Plumbline Construction Management &middot; Secure connection</p>
+</main>
+<script>
+/* Plumbline auth — talks to your real backend. No mock logins. */
+
+/* ============ CONFIG: match these to your backend ============ */
+const CONFIG = {
+  mode: "local",                      // "local" = works in this one file (saved in this browser). "server" = uses a backend API
+  API_BASE: "",                       // "" = same origin. e.g. "http://localhost:5000"
+  endpoints: {
+    employeeLogin:  "/api/auth/employee/login",     // POST { identifier, password }
+    ownerLogin:     "/api/auth/owner/login",        // POST { email, password }
+    createEmployee: "/api/owner/employees",
+    ownerRegister:  "/api/auth/owner/register"
+  },
+  dashboards: { employee: "employee-dashboard.html", owner: "owner-dashboard.html" },  // pages opened after login (same folder)
+  useCookies: true,                   // (server mode) session lives in an HttpOnly cookie
+  storageKey: "plumbline_auth"
+};
+/* =============================================================== */
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+let pendingBanner = null;
+function showBanner(msg, type) {
+  const b = $(".view:not([hidden]) .banner");
+  if (!b) return;
+  b.textContent = msg; b.className = "banner " + type; b.hidden = false;
+}
+function hideBanner() { $$(".banner").forEach(b => b.hidden = true); }
+
+function setError(input, msg) {
+  const f = input.closest(".field");
+  const p = $(`[data-err-for="${input.name}"]`, f);
+  f.classList.toggle("bad", !!msg);
+  if (p) p.textContent = msg || "";
+  input.setAttribute("aria-invalid", msg ? "true" : "false");
+}
+
+const rules = {
+  identifier: v => v.trim() ? "" : "Enter your employee ID or email.",
+  email: v => !v.trim() ? "Enter your email." : /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) ? "" : "Enter a valid email address.",
+  name: v => v.trim().length >= 2 ? "" : "Enter the employee name.",
+  employeeId: v => /^[A-Za-z0-9._-]{3,30}$/.test(v.trim()) ? "" : "Use 3-30 letters, numbers, dot, dash or underscore.",
+  department: v => v.trim().length >= 2 ? "" : "Enter a department or role.",
+  fullName: v => v.trim().length >= 2 ? "" : "Enter your full name.",
+  companyName: v => v.trim().length >= 2 ? "" : "Enter your company name.",
+  phone: v => /^\+?[\d\s\-()]{8,16}$/.test(v.trim()) && v.replace(/\D/g, "").length >= 8 ? "" : "Enter a valid phone number.",
+  password: (v, form) => {
+    if (!v) return "Enter your password.";
+    if (form.dataset.form === "ownerRegister" || form.dataset.form === "addEmployee") {
+      if (v.length < 8) return "Use at least 8 characters.";
+      if (!/[A-Za-z]/.test(v) || !/\d/.test(v)) return "Include both letters and numbers.";
+    }
+    return "";
+  },
+  confirmPassword: (v, form) => v === form.elements.password.value ? (v ? "" : "Confirm your password.") : "Passwords do not match."
+};
+
+function validate(form) {
+  let first = null;
+  $$("input", form).forEach(inp => {
+    const rule = rules[inp.name];
+    const msg = rule ? rule(inp.value, form) : "";
+    setError(inp, msg);
+    if (msg && !first) first = inp;
+  });
+  if (first) first.focus();
+  return !first;
+}
+
+async function api(endpoint, payload) {
+  if (CONFIG.mode === "local") return localApi(endpoint, payload);
+  let res;
+  try {
+    res = await fetch(CONFIG.API_BASE + endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      credentials: CONFIG.useCookies ? "include" : "same-origin",
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    throw new Error("Cannot reach the server. Check your connection and that the backend is running.");
+  }
+  let data = {};
+  try { data = await res.json(); } catch (_) {}
+  if (!res.ok) {
+    if (res.status === 405 || (res.status === 404 && !data.message))
+      throw new Error("This page is not connected to the Plumbline server. Run  python server.py  and open http://localhost:8000");
+    const msg = data.message || data.error || (Array.isArray(data.errors) && data.errors[0] && (data.errors[0].msg || data.errors[0])) ||
+      (res.status === 401 ? "Incorrect credentials." : res.status === 404 ? "Service not found. Check the API endpoint in auth.js." : `Request failed (${res.status}).`);
+    const err = new Error(typeof msg === "string" ? msg : "Request failed."); err.status = res.status; throw err;
+  }
+  return data;
+}
+
+
+const handlers = {
+  async employeeLogin(f) {
+    const data = await api(CONFIG.endpoints.employeeLogin, {
+      identifier: f.elements.identifier.value.trim(), password: f.elements.password.value
+    });
+    finishLogin(data, "employee");
+  },
+  async ownerLogin(f) {
+    const data = await api(CONFIG.endpoints.ownerLogin, {
+      email: f.elements.email.value.trim(), password: f.elements.password.value
+    });
+    finishLogin(data, "owner");
+  },
+  async ownerRegister(f) {
+    await api(CONFIG.endpoints.ownerRegister, {
+      fullName: f.elements.fullName.value.trim(),
+      companyName: f.elements.companyName.value.trim(),
+      email: f.elements.email.value.trim(),
+      phone: f.elements.phone.value.trim(),
+      password: f.elements.password.value,
+      confirmPassword: f.elements.confirmPassword.value
+    });
+    f.reset(); $$(".field.bad", f).forEach(x => x.classList.remove("bad"));
+    const m = $(".meter"); if (m) { m.dataset.s = 0; $("#meter-text").textContent = "Use 8+ characters with letters and numbers."; }
+    pendingBanner = ["Account created successfully. Sign in with your owner email and password.", "ok"];
+    location.hash = "#owner";
+  }
+};
+
+function finishLogin(data, expectedRole) {
+  const role = (data.role || (data.user && data.user.role) || expectedRole || "").toString().toLowerCase();
+  if (role && role !== expectedRole) {
+    throw new Error(expectedRole === "owner"
+      ? "This is not an owner account. Use Employee sign in instead."
+      : "This is not an employee account. Use Owner sign in instead.");
+  }
+  showBanner("Signed in. Opening your dashboard…", "ok");
+  setTimeout(() => { location.href = CONFIG.dashboards[expectedRole]; }, 500);
+}
+
+if (CONFIG.mode === "server" && location.protocol === "file:") document.addEventListener("DOMContentLoaded", () =>
+  showBanner("Open this app through the server: run  python server.py  then visit http://localhost:8000", "error"));
+
+/* wire up */
+$$("form[data-form]").forEach(form => {
+  form.addEventListener("input", e => { if (e.target.name) { const r = rules[e.target.name]; if (e.target.closest(".field").classList.contains("bad")) setError(e.target, r ? r(e.target.value, form) : ""); } });
+  form.addEventListener("submit", async e => {
+    e.preventDefault(); hideBanner();
+    if (!validate(form)) return;
+    const btn = $(".cta", form);
+    btn.disabled = true; btn.classList.add("busy");
+    try { await handlers[form.dataset.form](form); }
+    catch (err) { showBanner(err.message, "error"); }
+    finally { btn.disabled = false; btn.classList.remove("busy"); }
+  });
+});
+
+/* show / hide password */
+$$("[data-reveal]").forEach(b => b.addEventListener("click", () => {
+  const i = b.parentElement.querySelector("input");
+  const show = i.type === "password"; i.type = show ? "text" : "password";
+  b.setAttribute("aria-label", show ? "Hide password" : "Show password");
+}));
+
+/* password strength (registration) */
+const pw = $("input[data-strength]");
+if (pw) {
+  const m = $(".meter"), t = $("#meter-text");
+  const labels = ["Use 8+ characters with letters and numbers.", "Weak", "Fair", "Good", "Strong"];
+  pw.addEventListener("input", () => {
+    const v = pw.value; let s = 0;
+    if (v.length >= 8) s++; if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++; if (/\d/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v) || v.length >= 14) s++;
+    if (!v) s = 0; m.dataset.s = s; t.textContent = labels[s];
+  });
+}
+
+
+/* ---- view routing: #employee | #owner | #register ---- */
+const VIEWS = { employee: "Employee sign in", owner: "Owner sign in", register: "Create owner account" };
+function route() {
+  const key = (location.hash || "#employee").slice(1);
+  const view = VIEWS[key] ? key : "employee";
+  $$(".view").forEach(v => {
+    const on = v.dataset.view === view;
+    if (on && v.hidden) { v.hidden = false; v.classList.remove("enter"); void v.offsetWidth; v.classList.add("enter"); }
+    if (!on) v.hidden = true;
+  });
+  document.body.classList.toggle("wide", view === "register");
+  const tabs = $(".roles");
+  tabs.hidden = view === "register";
+  $$("a", tabs).forEach(a => { const on = a.dataset.tab === view; a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
+  $(".thumb", tabs).style.transform = view === "owner" ? "translateX(100%)" : "translateX(0)";
+  document.title = VIEWS[view] + " · Plumbline";
+  hideBanner();
+  if (pendingBanner) { showBanner(...pendingBanner); pendingBanner = null; }
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", route);
+route();
+
+
+/* ================= Local mode: accounts live in this browser (hashed passwords) ================= */
+const LS_DB = "plumbline_db", SS_SESSION = "plumbline_session";
+const store = {
+  load() { try { return JSON.parse(localStorage.getItem(LS_DB)) || { owners: [], employees: [] }; } catch (_) { return { owners: [], employees: [] }; } },
+  save(d) { localStorage.setItem(LS_DB, JSON.stringify(d)); }
+};
+const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+async function pbkdf2(pw, saltHex) {
+  const salt = Uint8Array.from(saltHex.match(/../g).map(h => parseInt(h, 16)));
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
+  return hex(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: 150000 }, key, 256));
+}
+async function hashPw(pw) { const salt = hex(crypto.getRandomValues(new Uint8Array(16))); return { salt, hash: await pbkdf2(pw, salt) }; }
+async function checkPw(pw, rec) { return (await pbkdf2(pw, rec.salt)) === rec.hash; }
+function fail(status, msg) { const e = new Error(msg); e.status = status; throw e; }
+const getSession = () => { try { return JSON.parse(sessionStorage.getItem(SS_SESSION)); } catch (_) { return null; } };
+const ownerView = o => ({ id: o.id, name: o.fullName, company: o.companyName, email: o.email, phone: o.phone });
+const empView = (e, o) => ({ id: e.id, name: e.name, employeeId: e.employeeId, email: e.email, phone: e.phone, department: e.department, company: o ? o.companyName : "" });
+
+async function localApi(endpoint, p) {
+  if (!window.crypto || !crypto.subtle) fail(500, "This browser cannot secure passwords here. Open the file in a current Chrome, Edge, Firefox or Safari.");
+  const d = store.load(), E = CONFIG.endpoints;
+  if (endpoint === E.ownerRegister) {
+    const email = p.email.trim().toLowerCase();
+    if (d.owners.some(o => o.email === email)) fail(409, "An owner account with this email already exists. Sign in instead.");
+    const pw = await hashPw(p.password);
+    d.owners.push({ id: uid(), fullName: p.fullName, companyName: p.companyName, email, phone: p.phone, salt: pw.salt, hash: pw.hash, createdAt: new Date().toISOString() });
+    store.save(d); return { message: "Account created successfully" };
+  }
+  if (endpoint === E.ownerLogin) {
+    const o = d.owners.find(x => x.email === p.email.trim().toLowerCase());
+    if (!o || !(await checkPw(p.password, o))) fail(401, "Incorrect email or password.");
+    sessionStorage.setItem(SS_SESSION, JSON.stringify({ role: "owner", id: o.id }));
+    return { role: "owner", user: ownerView(o) };
+  }
+  if (endpoint === E.employeeLogin) {
+    const k = p.identifier.trim().toLowerCase();
+    const e = d.employees.find(x => x.employeeId.toLowerCase() === k || x.email === k);
+    if (!e || !(await checkPw(p.password, e))) fail(401, "Incorrect employee ID/email or password.");
+    sessionStorage.setItem(SS_SESSION, JSON.stringify({ role: "employee", id: e.id }));
+    return { role: "employee", user: empView(e, d.owners.find(o => o.id === e.ownerId)) };
+  }
+  if (endpoint === E.createEmployee) {
+    const ses = getSession();
+    if (!ses || ses.role !== "owner" || !d.owners.some(o => o.id === ses.id)) fail(403, "Only a signed-in owner can create employees.");
+    const email = p.email.toLowerCase();
+    if (d.employees.some(x => x.employeeId.toLowerCase() === p.employeeId.toLowerCase())) fail(409, "Employee ID " + p.employeeId + " is already in use.");
+    if (d.employees.some(x => x.email === email)) fail(409, "An employee with this email already exists.");
+    const pw = await hashPw(p.password);
+    const rec = { id: uid(), ownerId: ses.id, name: p.name, employeeId: p.employeeId, email, phone: p.phone, department: p.department, salt: pw.salt, hash: pw.hash, createdAt: new Date().toISOString() };
+    d.employees.push(rec); store.save(d);
+    return { employee: empView(rec) };
+  }
+  fail(404, "Unknown action.");
+}
+
+</script>
+</body>
+</html>
